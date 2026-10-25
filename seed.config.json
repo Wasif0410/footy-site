@@ -1,0 +1,14 @@
+{
+  "team": {
+    "name": "Our Team",
+    "short": "OUR",
+    "primary": "#8c1d40",
+    "secondary": "#ede6d6"
+  },
+  "matches": {
+    "oct09": { "opponent": "Opponent", "competition": "Rec League", "venue": "The Dome" }
+  },
+  "exclude_matches": ["sample"],
+  "photos": true,
+  "clips": true
+}
