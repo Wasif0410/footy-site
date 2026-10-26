@@ -1,11 +1,11 @@
-import { Scoreboard } from "@/components/blocks";
+import { MatchHead } from "@/components/blocks";
 import { NavLinks } from "@/components/nav";
 import { match, site } from "@/lib/data";
 
 export const dynamicParams = false;
 
 export function generateStaticParams() {
-  return site().matches.map((m) => ({ id: m.id }));
+  return site().matches.filter((m) => m.stats).map((m) => ({ id: m.id }));
 }
 
 export default async function MatchLayout({ children, params }: { children: React.ReactNode; params: Promise<{ id: string }> }) {
@@ -13,18 +13,18 @@ export default async function MatchLayout({ children, params }: { children: Reac
   const m = match(id);
   const base = `/matches/${id}`;
   const tabs = [
-    { href: `${base}/`, label: "Summary" },
+    { href: `${base}/`, label: "Overview" },
+    { href: `${base}/review/`, label: "Watch" },
     { href: `${base}/ratings/`, label: "Ratings" },
-    { href: `${base}/box-score/`, label: "Box score" },
+    { href: `${base}/player-stats/`, label: "Player stats" },
+    { href: `${base}/movement/`, label: "Movement" },
     { href: `${base}/timeline/`, label: "Play-by-play" },
-    { href: `${base}/pitch/`, label: "Pitch" },
     { href: `${base}/highlights/`, label: "Highlights" },
   ];
   return (
     <>
-      <Scoreboard m={m} team={site().team}>
-        <div className="wrap"><NavLinks className="tabs" links={tabs} exact /></div>
-      </Scoreboard>
+      <MatchHead m={m} team={site().team} />
+      <div className="tabs-bar"><div className="wrap"><NavLinks className="tabs" label="Match sections" links={tabs} exact /></div></div>
       <main className="wrap">{children}</main>
     </>
   );

@@ -1,62 +1,81 @@
-import Link from "next/link";
-import { Leaders, PlayerOfTheMatch, ResultRow, Scoreboard, TopPerformers } from "@/components/blocks";
-import { ClipCard, Compare, GoalTimeline } from "@/components/ui";
-import { match, playerById, season, site } from "@/lib/data";
+import { Boards, ResultRow } from "@/components/blocks";
+import { Rating, SectionHead, Who } from "@/components/ui";
+import { matches, playerById, site } from "@/lib/data";
+import { fmt } from "@/lib/format";
+import { seasonPlayers, seasonTeam } from "@/lib/season";
 
 export default function Home() {
   const s = site();
+  const ms = matches();
   const people = playerById();
-  const latest = s.matches[0] ? match(s.matches[0].id) : null;
-  if (!latest) {
-    return <main className="wrap"><h1>No matches yet</h1><p className="muted">Seed the site from Footy Analyzer to see results here.</p></main>;
-  }
-  const potm = latest.players.find((p) => p.id === latest.potm);
-  const ourGoals = latest.goals.filter((g) => g.team === 0 && g.clip);
+  const team = seasonTeam(ms, s.matches);
+  const rows = seasonPlayers(ms);
+  const years = [...new Set(s.matches.map((m) => m.date?.slice(0, 4)).filter(Boolean))];
+  const comps = [...new Set(s.matches.map((m) => m.competition).filter(Boolean))];
+  const topRated = rows.filter((r) => r.avgRating !== null).sort((a, b) => b.avgRating! - a.avgRating! || b.minutes - a.minutes).slice(0, 6);
+  const plural = (n: number, w: string) => `${n} ${w}${n === 1 ? "" : "es"}`;
+
   return (
     <>
-      <Scoreboard m={latest} team={s.team}>
-        <div className="wrap" style={{ paddingBottom: "1rem", textAlign: "center" }}>
-          <Link href={`/matches/${latest.id}/`} className="chip" style={{ textDecoration: "none", background: "var(--club)", color: "var(--kit)", borderColor: "var(--club)" }}>
-            Open the match centre
-          </Link>
-        </div>
-      </Scoreboard>
-      <main className="wrap">
-        <div className="split">
-          <div className="grid">
-            {potm ? <section className="panel"><PlayerOfTheMatch line={potm} player={people.get(potm.id)} /></section> : null}
-            <section className="panel">
-              <div className="panel-head"><h2>How the match went</h2><Link href={`/matches/${latest.id}/`}>Full summary</Link></div>
-              <GoalTimeline goals={latest.goals} halves={latest.halves} />
-              <div style={{ marginTop: "1.25rem" }}><Compare stats={latest.team_stats.slice(0, 4)} /></div>
-            </section>
+      <section className="club-band">
+        <div className="wrap page">
+          <div>
+            <h1>{s.team.name}</h1>
+            <p className="sub">{[years.length ? `${years.join("–")} season` : null, comps.join(", ")].filter(Boolean).join(", ")}</p>
           </div>
-          <div className="grid">
-            <section className="panel">
-              <div className="panel-head"><h2>Top rated</h2><Link href={`/matches/${latest.id}/ratings/`}>All ratings</Link></div>
-              <TopPerformers m={latest} people={people} />
-            </section>
-            <section className="panel">
-              <div className="panel-head"><h2>Results</h2><Link href="/matches/">All matches</Link></div>
-              {s.matches.slice(0, 5).map((m) => <ResultRow key={m.id} m={m} team={s.team} />)}
-            </section>
+          <div className="record" aria-label="Season record">
+            <div><b>{team.played}</b><span>Played</span></div>
+            <div><b>{team.won}</b><span>Won</span></div>
+            <div><b>{team.drawn}</b><span>Drawn</span></div>
+            <div><b>{team.lost}</b><span>Lost</span></div>
           </div>
         </div>
+      </section>
 
-        {ourGoals.length ? (
-          <>
-            <div className="panel-head section-title"><h2>Our goals</h2><Link href={`/matches/${latest.id}/highlights/`}>All highlights</Link></div>
-            <div className="clips">
-              {ourGoals.map((g, i) => (
-                <ClipCard key={i} clip={g.clip!} min={g.minute} title={g.scorer?.name ?? "Goal"}
-                  sub={g.assist ? `assist ${g.assist.name}` : undefined} />
+      <main className="wrap page">
+        <section className="section">
+          <SectionHead title="The team this season"
+            note={team.withStats < team.played ? `From the ${plural(team.withStats, "match")} with stats. ${team.played - team.withStats} of ${team.played} played ${team.played - team.withStats === 1 ? "wasn't" : "weren't"} recorded.` : `Across ${plural(team.withStats, "match")}.`} />
+          <div className="figures">
+            <div><b>{team.possession ?? "–"}<small>%</small></b><span>Possession</span><em>Estimated from ball tracking</em></div>
+            <div><b>{fmt(team.passPct)}<small>%</small></b><span>Pass accuracy</span><em>Cut out or out of play counts as failed</em></div>
+            <div><b>{team.passes}</b><span>Passes completed</span><em>Every teammate, named or not</em></div>
+            <div><b>{team.shots}</b><span>Shots</span><em>{team.shotsOnTarget} on target</em></div>
+            <div><b>{team.tackles}</b><span>Tackles won</span><em>Winning the ball back</em></div>
+            <div><b>{team.interceptions}</b><span>Interceptions</span><em>Their passes cut out</em></div>
+            <div><b>{fmt(team.distanceKm, 1)}<small>km</small></b><span>Distance covered</span><em>The whole squad</em></div>
+            <div><b>{team.sprints}</b><span>Sprints</span><em>Bursts held above sprint speed</em></div>
+          </div>
+          <p className="note">Counted the way the system finds them, with the checks applied. Some of our moments are still waiting for a check.</p>
+        </section>
+
+        <div className="cols section">
+          <section className="span-7">
+            <SectionHead title="Top rated" note="Average match rating this season." more={{ href: "/leaderboards/", label: "Leaderboards" }} />
+            <ol className="ranked">
+              {topRated.map((r, i) => (
+                <li key={r.id}>
+                  <span className="pos">{i + 1}</span>
+                  <Who player={people.get(r.id)} sub={`${plural(r.matches, "match")}, ${fmt(r.minutes)} min, ${r.goals} G, ${r.assists} A`} />
+                  <Rating value={r.avgRating} />
+                </li>
               ))}
-            </div>
-          </>
-        ) : null}
+            </ol>
+          </section>
+          <section className="span-5">
+            <SectionHead title="Results" more={{ href: "/matches/", label: "All matches" }} />
+            <ul className="results">{s.matches.slice(0, 6).map((m) => <ResultRow key={m.id} m={m} team={s.team} />)}</ul>
+            <p className="form" aria-label="Form, oldest first">
+              <span>Form</span>
+              {team.form.map((m) => <span key={m.id} className={`outcome ${m.result}`}>{m.result}</span>)}
+            </p>
+          </section>
+        </div>
 
-        <div className="panel-head section-title"><h2>Season leaders</h2><Link href="/stats/">All stats</Link></div>
-        <Leaders rows={season()} people={people} />
+        <section className="section">
+          <SectionHead title="Season leaders" more={{ href: "/leaderboards/", label: "Every leaderboard" }} />
+          <Boards rows={rows} people={people} keys={["goals", "assists", "won", "speed", "distance", "passpct"]} />
+        </section>
       </main>
     </>
   );

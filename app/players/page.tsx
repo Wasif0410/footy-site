@@ -1,36 +1,42 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Rating } from "@/components/ui";
-import { players, season } from "@/lib/data";
-import { fmt } from "@/lib/format";
+import { FutCard } from "@/components/fut-card";
+import { SectionHead } from "@/components/ui";
+import { ATTR_NOTES, cardFor, teamBaseline, type Attr } from "@/lib/cards";
+import { matches, players } from "@/lib/data";
+import { seasonPlayers } from "@/lib/season";
 
 export const metadata: Metadata = { title: "Players" };
 
 export default function Players() {
-  const rows = new Map(season().map((r) => [r.player_id, r]));
-  const squad = [...players()].sort((a, b) => (a.keeper === b.keeper ? (a.number ?? 99) - (b.number ?? 99) : a.keeper ? -1 : 1));
+  const ms = matches();
+  const rows = seasonPlayers(ms);
+  const avg = teamBaseline(rows);
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const potm = ms[0]?.potm ?? null;                     // player of the latest match gets the special card
+  const squad = players().map((p) => ({ p, card: byId.has(p.id) ? cardFor(byId.get(p.id)!, p.keeper, avg) : null }))
+    .sort((a, b) => (b.card?.ovr ?? -1) - (a.card?.ovr ?? -1) || a.p.name.localeCompare(b.p.name));
   return (
-    <main className="wrap">
-      <h1 style={{ fontSize: "2.4rem", marginBottom: "1.25rem" }}>Squad</h1>
-      <div className="cards">
-        {squad.map((p) => {
-          const r = rows.get(p.id);
-          return (
-            <Link className="card" key={p.id} href={`/players/${p.slug}/`}>
-              <div className="photo" style={{ backgroundImage: p.photo ? `url(${p.photo})` : undefined }}>
-                <span className="shirt">{p.number ?? ""}</span>
-                {r ? <Rating value={r.avg_rating} /> : null}
-              </div>
-              <div className="body">
-                <strong>{p.name}</strong>
-                <span className="muted small">
-                  {p.keeper ? "Goalkeeper · " : ""}{r ? `${r.matches} match${r.matches === 1 ? "" : "es"} · ${fmt(r.minutes)} min` : "No minutes yet"}
-                </span>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+    <main className="wrap page">
+      <section className="section">
+        <h1>Squad</h1>
+        <p className="lede" style={{ marginTop: "0.6rem" }}>
+          Every player&apos;s card, rated from what the video measured this season. Open a card for their season, every rating with the
+          moments behind it, and their heatmap.
+        </p>
+      </section>
+      <section className="section">
+        <SectionHead title="Player cards" note="Best first. Gold from 75 overall, silver from 65. Keepers show ?? until saves are measured." />
+        <div className="squad fut-grid">
+          {squad.map(({ p, card }) => card ? <FutCard key={p.id} card={card} player={p} special={p.id === potm} /> : null)}
+        </div>
+      </section>
+      <section className="section">
+        <SectionHead title="How the cards are rated"
+          note="Overall is mostly the player's average match rating, topped up by their attributes. Each attribute is a rate per minute on camera, set against the squad: the team's average is 65, twice it is 85, and 90+ takes something special. A short spell counts for less: every player's rate is blended with 10 minutes at the team's average, so a few lucky minutes can't make a 94. Position is where most of their rating points come from: attack, on the ball (MID) or defending." />
+        <ul className="card-notes">
+          {(Object.keys(ATTR_NOTES) as Attr[]).map((k) => <li key={k}><b>{k}</b>{ATTR_NOTES[k].replace(/^[A-Za-z]+: /, "")}</li>)}
+        </ul>
+      </section>
     </main>
   );
 }

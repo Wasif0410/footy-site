@@ -5,7 +5,7 @@
   "description": "Public match centre for our team: results, ratings, stats and highlights, seeded from the local Footy Analyzer.",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/flatten-segments.mjs",
     "lint": "tsc --noEmit"
   },
   "engines": {

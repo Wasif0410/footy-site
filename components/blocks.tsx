@@ -1,130 +1,108 @@
-// Larger sections shared by several pages: the scoreboard, a result row, player of the match,
-// season leaders.
+// Larger pieces shared by several pages: the match header, a result row, leader boards.
 import Link from "next/link";
-import type { Match, MatchPlayer, Player, SeasonRow, Site } from "@/lib/data";
-import { fmt, longDate, minute, shortDate } from "@/lib/format";
-import { BallIcon, Crest, PlayerLine, Rating } from "./ui";
+import type { Match, MatchSummary, Player, Site } from "@/lib/data";
+import { longDate, minute, shortDate } from "@/lib/format";
+import type { Board, SeasonPlayer } from "@/lib/season";
+import { BOARDS, leaders } from "@/lib/season";
+import { Shirt } from "./ui";
 
-export function Scoreboard({ m, team, children }: { m: Match; team: Site["team"]; children?: React.ReactNode }) {
-  const ours = m.goals.filter((g) => g.team === 0);
-  const theirs = m.goals.filter((g) => g.team === 1);
+const unfound = (n: number) => (n ? `${n} unable to find` : null);
+
+export function MatchHead({ m, team }: { m: Match; team: Site["team"] }) {
   const won = m.score.us > m.score.them, lost = m.score.us < m.score.them;
-  // scorers grouped like a broadcast: "Aryan 10', 15'"
+  // scorers grouped as a broadcast lists them: "Aryan 10', 15'"
   const byScorer = new Map<string, number[]>();
-  ours.forEach((g) => { const n = g.scorer?.name ?? "Own goal / unknown"; byScorer.set(n, [...(byScorer.get(n) ?? []), g.minute]); });
+  m.goals.filter((g) => g.team === 0).forEach((g) => {
+    const n = g.scorer?.name ?? "Unknown scorer";
+    byScorer.set(n, [...(byScorer.get(n) ?? []), g.minute]);
+  });
+  const ours = [...[...byScorer].map(([n, mins]) => `${n} ${mins.map(minute).join(", ")}`), unfound(m.goals_missing.us)].filter(Boolean);
+  const theirs = [m.goals.filter((g) => g.team === 1).map((g) => minute(g.minute)).join(", "), unfound(m.goals_missing.them)].filter(Boolean);
   return (
-    <section className="scoreboard">
+    <section className="match-head">
       <div className="wrap">
-        <p className="sb-meta">{[m.competition, longDate(m.date), m.venue].filter(Boolean).join("  ·  ")}</p>
-        <div className="sb-main">
-          <div className="sb-team"><Crest name={team.short} side="us" size={3} />{team.name}</div>
-          <div>
-            <div className="sb-score" aria-label={`${team.name} ${m.score.us}, ${m.opponent} ${m.score.them}`}>
-              <span className={won ? "win" : lost ? "lose" : ""}>{m.score.us}</span>
-              <span className="dash">–</span>
-              <span className={lost ? "win" : won ? "lose" : ""}>{m.score.them}</span>
-            </div>
-            <span className="sb-status">FULL TIME</span>
-          </div>
-          <div className="sb-team right">{m.opponent}<Crest name={m.opponent} side="them" size={3} /></div>
+        <p className="meta">{[m.competition, longDate(m.date), m.venue].filter(Boolean).join(", ")}</p>
+        <div className="scoreline">
+          <span className="team">{team.name}</span>
+          <span className="score" aria-label={`${team.name} ${m.score.us}, ${m.opponent} ${m.score.them}`}>
+            <span className={lost ? "lose" : ""}>{m.score.us}</span>
+            <span className="sep">–</span>
+            <span className={won ? "lose" : ""}>{m.score.them}</span>
+          </span>
+          <span className="team them">{m.opponent}</span>
         </div>
-        <div className="sb-scorers">
-          <ul>
-            {[...byScorer].map(([n, mins]) => (
-              <li key={n}><BallIcon className="ball" />{n} {mins.map(minute).join(", ")}</li>
-            ))}
-          </ul>
-          <span />
-          <ul className="right">
-            {theirs.length ? <li>{theirs.map((g) => minute(g.minute)).join(", ")}<BallIcon className="ball" /></li> : null}
-          </ul>
+        <p className="ft">FULL TIME</p>
+        <div className="scorers">
+          <span>{ours.join("; ")}</span>
+          <span className="them">{theirs.join("; ")}</span>
         </div>
       </div>
-      {children}
     </section>
   );
 }
 
-export function ResultRow({ m, team }: { m: Pick<Match, "id" | "date" | "opponent" | "competition" | "score" | "result">; team: Site["team"] }) {
-  return (
-    <Link className="result-row" href={`/matches/${m.id}/`}>
-      <span className="muted small">{shortDate(m.date)}</span>
-      <span>
-        <span className="opp" style={{ fontWeight: 650 }}>{team.short} vs {m.opponent}</span>
-        <span className="muted small comp" style={{ display: "block" }}>{m.competition}</span>
-      </span>
-      <span className="score">{m.score.us}–{m.score.them}</span>
-      <span className={`pill ${m.result}`} aria-label={{ W: "Win", L: "Loss", D: "Draw" }[m.result]}>{m.result}</span>
-    </Link>
+export function ResultRow({ m, team }: { m: MatchSummary; team: Site["team"] }) {
+  const inner = (
+    <>
+      <span className="date">{m.date ? shortDate(m.date) : m.stats ? "Date TBC" : "–"}</span>
+      <span className="vs">{team.name} v {m.opponent}<small>{[m.competition, m.venue].filter(Boolean).join(", ")}</small></span>
+      {m.stats ? <span className="score">{m.score ? `${m.score.us}–${m.score.them}` : "–"}</span>
+        : <span className="nostat">{m.score ? `${m.score.us}–${m.score.them}, ` : ""}Not recorded</span>}
+      <span className={`outcome ${m.result}`} aria-label={{ W: "Win", L: "Loss", D: "Draw" }[m.result]}>{m.result}</span>
+    </>
   );
+  return <li>{m.stats ? <Link className="result" href={`/matches/${m.id}/`}>{inner}</Link> : <div className="result nostats">{inner}</div>}</li>;
 }
 
-export function PlayerOfTheMatch({ line, player }: { line: MatchPlayer; player: Player | undefined }) {
-  const s = line.stats;
-  const facts = [
-    s.goals ? `${s.goals} goal${s.goals > 1 ? "s" : ""}` : null,
-    s.assists ? `${s.assists} assist${s.assists > 1 ? "s" : ""}` : null,
-    s.tackles_won + s.interceptions ? `${s.tackles_won + s.interceptions} balls won` : null,
-    s.passes_attempted ? `${s.passes}/${s.passes_attempted} passes` : null,
-    line.running.distance_km ? `${fmt(line.running.distance_km, 1)} km` : null,
-  ].filter(Boolean) as string[];
-  return (
-    <div className="spotlight">
-      <div className="photo" style={{ backgroundImage: player?.photo ? `url(${player.photo})` : undefined }} role="img" aria-label={player?.name ?? ""} />
-      <div>
-        <p className="kicker">Player of the match</p>
-        <h3>{player ? <Link href={`/players/${player.slug}/`} style={{ textDecoration: "none" }}>{player.name}</Link> : "–"}</h3>
-        <Rating value={line.rating} large />
-        <div className="chips">{facts.map((f) => <span className="chip" key={f}>{f}</span>)}</div>
-      </div>
-    </div>
-  );
+// A player's face (their photo from the video), or their shirt when there's no photo.
+export function Face({ player, size = "sm" }: { player: Player | undefined; size?: "sm" | "lg" }) {
+  if (!player?.photo) return <span className={`face ${size} none`}><Shirt number={player?.number} size={size === "lg" ? "lg" : "sm"} /></span>;
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img className={`face ${size}`} src={player.photo} alt="" loading="lazy" />;
 }
 
-export function TopPerformers({ m, people }: { m: Match; people: Map<number, Player> }) {
+// Leader boards, one box each: the leader up top with their photo, then the chasing pack.
+export function Boards({ rows, people, boards = BOARDS, keys, top = 3 }: {
+  rows: SeasonPlayer[]; people: Map<number, Player>; boards?: Board[]; keys?: string[]; top?: number;
+}) {
+  const list = keys ? keys.map((k) => boards.find((b) => b.key === k)).filter((b): b is Board => !!b) : boards;
   return (
-    <ol className="feed" style={{ listStyle: "none" }}>
-      {m.players.filter((p) => p.rating !== null).slice(0, 5).map((p, i) => (
-        <li key={p.id} style={{ gridTemplateColumns: "1.4rem 1fr auto", alignItems: "center" }}>
-          <span className="num">{i + 1}</span>
-          <PlayerLine player={people.get(p.id)} sub={`${fmt(p.minutes)} min · ${p.stats.goals} G · ${p.stats.assists} A`} />
-          <Rating value={p.rating} />
-        </li>
-      ))}
-    </ol>
-  );
-}
-
-type Leader = { title: string; value: (r: SeasonRow) => number | null; show: (v: number) => string; min?: (r: SeasonRow) => boolean };
-
-export const LEADERS: Leader[] = [
-  { title: "Average rating", value: (r) => r.avg_rating, show: (v) => v.toFixed(1) },
-  { title: "Goals", value: (r) => r.goals, show: (v) => String(v) },
-  { title: "Assists", value: (r) => r.assists, show: (v) => String(v) },
-  { title: "Balls won", value: (r) => r.tackles_won + r.interceptions, show: (v) => String(v) },
-  { title: "Distance covered", value: (r) => r.distance_km, show: (v) => `${v.toFixed(1)} km` },
-  { title: "Pass accuracy", value: (r) => r.pass_pct, show: (v) => `${Math.round(v)}%`, min: (r) => r.passes_attempted >= 5 },
-];
-
-export function Leaders({ rows, people, top = 3 }: { rows: SeasonRow[]; people: Map<number, Player>; top?: number }) {
-  return (
-    <div className="leaders">
-      {LEADERS.map((l) => {
-        const list = rows.filter((r) => (l.min ? l.min(r) : true) && (l.value(r) ?? 0) > 0)
-          .sort((a, b) => (l.value(b) ?? 0) - (l.value(a) ?? 0)).slice(0, top);
+    <div className="boards">
+      {list.map((b) => {
+        const best = leaders(b, rows, top);
+        const first = best[0], lead = first ? people.get(first.p.id) : undefined;
         return (
-          <section className="panel leader" key={l.title}>
-            <div className="panel-head"><h3>{l.title}</h3></div>
-            {list.length ? (
-              <ol>
-                {list.map((r) => (
-                  <li key={r.player_id}>
-                    <PlayerLine player={people.get(r.player_id)} sub={r.number !== null ? `#${r.number}` : undefined} />
-                    <span className="val">{l.show(l.value(r) ?? 0)}</span>
-                  </li>
-                ))}
+          <section className="board" key={b.key}>
+            <header>
+              <h3>{b.title}</h3>
+              {b.note ? <p className="bnote">{b.note}</p> : null}
+            </header>
+            {first && lead ? (
+              <Link className="leader" href={`/players/${lead.slug}/`}>
+                <Face player={lead} size="lg" />
+                <span className="who-lead">
+                  <span className="no">{lead.number ?? ""}</span>
+                  <strong>{lead.name}</strong>
+                </span>
+                <span className="big">{b.show(first.v)}</span>
+              </Link>
+            ) : <p className="empty">Nobody yet.</p>}
+            {best.length > 1 ? (
+              <ol start={2}>
+                {best.slice(1).map(({ p, v }, i) => {
+                  const pl = people.get(p.id);
+                  return (
+                    <li key={p.id}>
+                      <span className="pos">{i + 2}</span>
+                      {pl ? (
+                        <Link className="row-who" href={`/players/${pl.slug}/`}><Face player={pl} /><span className="name">{pl.name}</span></Link>
+                      ) : <span className="row-who">?</span>}
+                      <span className="v">{b.show(v)}</span>
+                    </li>
+                  );
+                })}
               </ol>
-            ) : <p className="muted small">Nobody yet.</p>}
+            ) : null}
           </section>
         );
       })}

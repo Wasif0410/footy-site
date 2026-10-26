@@ -1,53 +1,65 @@
 import type { Metadata } from "next";
-import { Leaders } from "@/components/blocks";
+import Link from "next/link";
 import { SortTable, type Column, type Row } from "@/components/sort-table";
-import { PlayerLine, Rating } from "@/components/ui";
-import { playerById, season } from "@/lib/data";
-import { fmt, pct } from "@/lib/format";
+import { Rating, SectionHead, Who } from "@/components/ui";
+import { playerById } from "@/lib/data";
+import { fmt, pct, signed } from "@/lib/format";
+import { seasonPlayers } from "@/lib/season";
 
 export const metadata: Metadata = { title: "Stats" };
 
 const COLUMNS: Column[] = [
   { key: "player", label: "Player", numeric: false },
-  { key: "mp", label: "MP", title: "Matches played" },
-  { key: "min", label: "Min" },
-  { key: "rating", label: "Avg rating" },
-  { key: "best", label: "Best" },
-  { key: "g", label: "G" },
-  { key: "a", label: "A" },
-  { key: "passes", label: "Passes" },
-  { key: "pass_pct", label: "Pass %" },
-  { key: "sh", label: "Shots" },
-  { key: "tkl", label: "Tkl", title: "Tackles won" },
-  { key: "int", label: "Int", title: "Interceptions" },
-  { key: "lost", label: "Lost", title: "Times lost the ball" },
-  { key: "km", label: "Km" },
+  { key: "mp", label: "Played", title: "Matches played" },
+  { key: "min", label: "Min", title: "Minutes on the pitch" },
+  { key: "rating", label: "Average", group: "Rating" },
+  { key: "best", label: "Best", group: "Rating" },
+  { key: "g", label: "Goals", group: "Attack" },
+  { key: "a", label: "Assists", group: "Attack" },
+  { key: "sh", label: "Shots", group: "Attack" },
+  { key: "pc", label: "Made", title: "Passes completed", group: "Passing" },
+  { key: "pp", label: "Accuracy", group: "Passing" },
+  { key: "tk", label: "Tackles", title: "Tackles won", group: "Defending" },
+  { key: "in", label: "Interceptions", group: "Defending" },
+  { key: "to", label: "Touches", group: "On the ball" },
+  { key: "lo", label: "Lost it", title: "Passes cut out, tackled or ball out of play", group: "Mistakes" },
+  { key: "mk", label: "Points lost", title: "Rating points lost to mistakes", group: "Mistakes" },
+  { key: "km", label: "Distance", group: "Running" },
+  { key: "ts", label: "Top speed", title: "Fastest speed held for a full second", group: "Running" },
+  { key: "sp", label: "Sprints", group: "Running" },
 ];
 
 export default function Stats() {
   const people = playerById();
-  const rows: Row[] = season().map((r) => ({
-    id: r.player_id,
+  const season = seasonPlayers();
+  const rows: Row[] = season.map((r) => ({
+    id: r.id,
     cells: {
-      player: <PlayerLine player={people.get(r.player_id)} sub={r.number !== null ? `#${r.number}` : undefined} />,
-      mp: r.matches, min: fmt(r.minutes), rating: <Rating value={r.avg_rating} />, best: fmt(r.best_rating, 1),
-      g: r.goals, a: r.assists, passes: `${r.passes}/${r.passes_attempted}`, pass_pct: pct(r.pass_pct),
-      sh: `${r.shots} (${r.shots_on_target})`, tkl: r.tackles_won, int: r.interceptions, lost: r.turnovers,
-      km: fmt(r.distance_km, 1),
+      player: <Who player={people.get(r.id)} />, mp: r.matches, min: fmt(r.minutes),
+      rating: <Rating value={r.avgRating} />, best: fmt(r.bestRating, 1),
+      g: r.goals, a: r.assists, sh: `${r.shots} (${r.shotsOnTarget})`, pc: `${r.passes}/${r.passesAttempted}`,
+      pp: r.passesAttempted ? pct(r.passPct) : "–", tk: r.tackles, in: r.interceptions, to: r.touches,
+      lo: r.turnovers, mk: r.mistakePoints ? signed(r.mistakePoints) : "0",
+      km: `${fmt(r.distanceKm, 1)} km`, ts: r.topSpeed ? `${r.topSpeed.toFixed(1)} km/h` : "–", sp: r.sprints,
     },
     sort: {
-      player: r.name, mp: r.matches, min: r.minutes, rating: r.avg_rating, best: r.best_rating, g: r.goals, a: r.assists,
-      passes: r.passes, pass_pct: r.passes_attempted ? r.pass_pct : null, sh: r.shots, tkl: r.tackles_won,
-      int: r.interceptions, lost: r.turnovers, km: r.distance_km,
+      player: people.get(r.id)?.name ?? "", mp: r.matches, min: r.minutes, rating: r.avgRating, best: r.bestRating,
+      g: r.goals, a: r.assists, sh: r.shots, pc: r.passes, pp: r.passesAttempted ? r.passPct : null, tk: r.tackles,
+      in: r.interceptions, to: r.touches, lo: r.turnovers, mk: -r.mistakePoints, km: r.distanceKm, ts: r.topSpeed, sp: r.sprints,
     },
   }));
   return (
-    <main className="wrap">
-      <h1 style={{ fontSize: "2.4rem", marginBottom: "1.25rem" }}>Season stats</h1>
-      <Leaders rows={season()} people={people} top={5} />
-      <section className="panel" style={{ marginTop: "1rem" }}>
-        <div className="panel-head"><h2>Every player</h2><span className="muted small">Click a column to sort</span></div>
-        <SortTable columns={COLUMNS} rows={rows} initial="rating" caption="Only moments checked by the team or that the system is sure of count." />
+    <main className="wrap page">
+      <section className="section">
+        <h1>Season stats</h1>
+        <p className="lede" style={{ marginTop: "0.6rem" }}>
+          Every player&apos;s season in one table. For who leads on each measure, see the <Link className="more" href="/leaderboards/">leaderboards</Link>.
+        </p>
+      </section>
+      <section className="section">
+        <SectionHead title="Every player" note="Click any heading to sort by it." />
+        <SortTable columns={COLUMNS} rows={rows} initial="rating"
+          caption="Only moments the system is sure of, or that were checked one by one, are counted. Running is measured while a player is in shot and scaled to their minutes." />
       </section>
     </main>
   );

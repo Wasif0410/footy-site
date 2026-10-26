@@ -33,6 +33,9 @@ Clips and photos are made once and kept, so re-seeding takes about 20 seconds. D
 | `team.primary`, `team.secondary` | Kit colours (for reference; the stylesheet uses maroon and cream) |
 | `matches.<id>.opponent` | Who we played (shown on the scoreboard) |
 | `matches.<id>.competition`, `.venue` | Shown above the scoreboard |
+| `matches.<id>.score` | The real final score, e.g. `{"us": 2, "them": 10}`. Goals the video didn't show are listed as "unable to find" |
+| `matches.<id>.video` | `youtube` (the unlisted upload's id), `offset` (seconds, if the upload was trimmed), `local` (only used on this computer) |
+| `extra_matches` | Matches played without stats: `id`, `date`, `opponent`, `result` (W/D/L), optional `score`. They count in the record and show as "No stats available" |
 | `exclude_matches` | Match ids to leave off the site |
 | `photos`, `clips` | Turn player photos or video clips off |
 
@@ -46,8 +49,9 @@ Clips and photos are made once and kept, so re-seeding takes about 20 seconds. D
 ## First deploy (one time)
 
 1. Create an empty GitHub repo (private is fine) and push this one to it.
-2. On vercel.com: **Add New → Project**, import the repo. Vercel detects Next.js; no
-   environment variables are needed.
+2. On vercel.com: **Add New → Project**, import the repo. `vercel.json` already sets everything
+   (build `npm run build`, output `out/`, served as plain static files); leave the framework preset
+   as it comes and add no environment variables.
 3. Share the `*.vercel.app` link with the team.
 
 The site asks search engines not to index it, but anyone with the link can open it. Vercel can put

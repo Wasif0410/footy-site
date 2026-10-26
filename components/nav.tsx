@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function NavLinks({ links, className, exact = false }: { links: { href: string; label: string }[]; className: string; exact?: boolean }) {
-  const path = usePathname() || "/";
+export function NavLinks({ links, className, label, exact = false }: {
+  links: { href: string; label: string }[]; className: string; label: string; exact?: boolean;
+}) {
+  const path = (usePathname() || "/").replace(/\/$/, "");
   const here = (href: string) => {
-    const a = path.replace(/\/$/, ""), b = href.replace(/\/$/, "");
-    return exact || b === "" ? a === b : a === b || a.startsWith(`${b}/`);
+    const b = href.replace(/\/$/, "");
+    return exact || b === "" ? path === b : path === b || path.startsWith(`${b}/`);
   };
   return (
-    <nav className={className} aria-label={className === "tabs" ? "Match sections" : "Site"}>
+    <nav className={className} aria-label={label}>
       {links.map((l) => (
         <Link key={l.href} href={l.href} aria-current={here(l.href) ? "page" : undefined}>{l.label}</Link>
       ))}
