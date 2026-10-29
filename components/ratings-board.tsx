@@ -64,7 +64,7 @@ export function RatingsBoard({ rows, people, formula, matchId, periods, potm }: 
               {head("played", "Played")}
               {head("points", "Points", "Points from every action, before comparing with the team")}
               {head("mistakes", "Mistakes", "Passes cut out, tackled, ball out of play: the points they cost")}
-              {head("per_hour", "Per hour", "Points per hour named on camera")}
+              {head("per_hour", "Per hour", "Points per hour on camera (checked players: per hour played)")}
               {head("rating", "Rating")}
             </tr>
           </thead>
@@ -180,7 +180,9 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
           <h4>From points to rating</h4>
           <ol className="sum-list">
             <li>
-              <span>{f.judge_on === "named"
+              <span>{r.checked
+                ? `Points in ${mmss(r.minutes * 60)} played, every moment checked from the video`
+                : f.judge_on === "named"
                 ? `Points in ${mmss((r.judged_min ?? 0) * 60)} named on camera (of ${mmss(r.minutes * 60)} played)`
                 : `Points in ${mmss(r.minutes * 60)} on the pitch`}</span>
               <b>{signed(r.points)}</b>

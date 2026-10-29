@@ -44,6 +44,7 @@ export type Running = {
 export type MatchPlayer = {
   id: number; minutes: number; stints: number; rating: number | null; keeper: boolean;
   position?: string | null;                  // where they played in this match (CB, CDM, RM, ST...)
+  checked?: boolean;                         // followed through the video by Claude (all his minutes)
   band?: number | null;                      // how far the rating could move as its events are checked
   points: number | null; per_hour: number | null; expected: number | null; above: number | null;
   judged_min: number | null; seen_min: number | null; estimated: string[];
