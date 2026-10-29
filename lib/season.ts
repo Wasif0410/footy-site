@@ -10,7 +10,9 @@ export type SeasonPlayer = {
   passes: number; passesAttempted: number; passPct: number | null; passesForward: number; receptions: number;
   tackles: number; interceptions: number; ballsWon: number; turnovers: number; dispossessed: number;
   mistakes: number; mistakePoints: number; touches: number; carries: number; possessionS: number;
-  distanceKm: number; topSpeed: number | null; sprints: number; waiting: number; keeper: boolean;
+  distanceKm: number; topSpeed: number | null; sprints: number; waiting: number;
+  keeper: boolean;                           // only ever played in goal
+  played: number; playedMin: number;         // every match, in goal too (the rest counts outfield games only)
   sections: Record<string, number>;          // rating points by section (Attacking, On the ball, Defending, ...)
 };
 
@@ -22,7 +24,10 @@ const mistakesOf = (p: MatchPlayer) => p.breakdown.filter((b) => b.each < 0);
 export function seasonPlayers(ms: Match[] = matches()): SeasonPlayer[] {
   const lines = new Map<number, MatchPlayer[]>();
   ms.forEach((m) => m.players.forEach((p) => lines.set(p.id, [...(lines.get(p.id) ?? []), p])));
-  return [...lines].map(([id, ls]) => {
+  return [...lines].map(([id, all]) => {
+    // games in goal aren't outfield play: a player who also played outfield is judged on those games
+    const outfield = all.filter((l) => !l.keeper);
+    const ls = outfield.length ? outfield : all;
     const st = (k: keyof MatchPlayer["stats"]) => sum(ls.map((l) => Number(l.stats[k]) || 0));
     const rated = ls.map((l) => l.rating).filter((r): r is number => r !== null);
     const speeds = ls.map((l) => l.running.top_speed_kmh).filter((v): v is number => v !== null);
@@ -44,7 +49,8 @@ export function seasonPlayers(ms: Match[] = matches()): SeasonPlayer[] {
       touches: st("touches"), carries: st("carries_forward"), possessionS: st("possession_s"),
       distanceKm: sum(ls.map((l) => l.running.distance_km || 0)),
       topSpeed: speeds.length ? Math.max(...speeds) : null, sprints: sum(ls.map((l) => l.running.sprints || 0)),
-      waiting: sum(ls.map((l) => l.waiting || 0)), sections, keeper: ls.some((l) => l.keeper),
+      waiting: sum(ls.map((l) => l.waiting || 0)), sections, keeper: !outfield.length,
+      played: all.length, playedMin: sum(all.map((l) => l.minutes)),
     };
   });
 }

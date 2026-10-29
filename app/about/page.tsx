@@ -33,9 +33,14 @@ export default function About() {
           <>
             <h2>How ratings work</h2>
             <p>
-              Every action is worth points: good ones add, mistakes take away. A player&apos;s points are compared with what the
-              team&apos;s average player makes in the same time on camera, and a player who keeps up the average gets
-              {" "}{f.baseline.toFixed(1)}. More impact over more time counts for more. A curve keeps ratings between
+              Every action is worth points: good ones add, mistakes take away.{" "}
+              {f.compare === "fixed"
+                ? <>Everyone starts from {f.baseline.toFixed(1)} and their own points move them up or down, the way FotMob and
+                  {" "}SofaScore rate a match, so a teammate&apos;s goals never pull anyone else down. One goal on its own is worth about
+                  {" "}+1.3. A curve keeps ratings between</>
+                : <>A player&apos;s points are compared with what the team&apos;s average player makes in the same time on camera, and a
+                  {" "}player who keeps up the average gets {f.baseline.toFixed(1)}. More impact over more time counts for more. A curve
+                  {" "}keeps ratings between</>}
               {" "}{(f.baseline - f.spread).toFixed(1)} and {(f.baseline + f.spread).toFixed(1)}, and makes them harder to raise the higher they
               are. Players need {f.min_minutes} minutes to be rated, and keepers aren&apos;t rated yet because saves aren&apos;t measured.
             </p>

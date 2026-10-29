@@ -555,6 +555,8 @@ main section.section:not(:has(h1)):not(:has(.boards)):not(:has(.clips)):not(:has
 
 /* ---------- player cards, in the style of the football game ---------- */
 .fut-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(12.5rem, 1fr)); gap: 1.6rem 1.2rem; justify-items: center; }
+.loan { margin: 0; display: grid; justify-items: center; gap: 0.6rem; }
+.loan figcaption { max-width: 13rem; text-align: center; font-size: 0.85rem; color: var(--ink-2); }
 .fut {
   --a: #f7e9b0; --b: #e2c46b; --c: #b98f2e; --ink-f: #2c2108;
   position: relative; display: flex; flex-direction: column; width: 13rem; height: 18.8rem;

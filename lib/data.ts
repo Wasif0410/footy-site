@@ -60,7 +60,8 @@ export type Match = {
   periods: [number, number][]; frame: [number, number]; video: Video; screens: Screen[];
   lineup: { id: number; keeper: boolean; spans: [number, number][] }[];
   // checked: our moments checked by hand; claude: decided by Claude from the video
-  review: { events: number; checked: number; claude?: number; waiting: number; goals: number; goals_checked: number };
+  review: { events: number; checked: number; claude?: number; waiting: number; goals: number; goals_checked: number;
+    players_checked?: number };   // players_checked: followed moment by moment through the video by Claude
 };
 
 // every match on the season's list; stats: false for a match played but not filmed or analysed
@@ -68,10 +69,14 @@ export type MatchSummary = Pick<Match, "id" | "date" | "venue" | "opponent" | "c
   score: { us: number; them: number } | null; stats: boolean;
 };
 
-export type Player = { id: number; slug: string; name: string; number: number | null; keeper: boolean; photo: string | null };
+// keeper: only ever played in goal; loan: a guest for a day (shown apart from the squad)
+export type Player = {
+  id: number; slug: string; name: string; number: number | null; keeper: boolean; photo: string | null; loan?: string | null;
+};
 
 export type Formula = {
   baseline: number; spread: number; scale: number; per: number; min_minutes: number; judge_on: string;
+  compare?: "team" | "fixed";               // fixed: everyone from the same baseline, points on their own
   min_named_minutes: number; team_per_hour: number; sections: string[];
   sure?: { checked: number; claude: number; auto: number; pending: number };
   actions: { key: string; label: string; section: string; each: number }[];

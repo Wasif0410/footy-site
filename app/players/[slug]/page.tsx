@@ -43,7 +43,8 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
             <span className="no">{p.number ?? ""}</span>
             <h1>{p.name}</h1>
             <p className="facts">
-              {[p.keeper ? "Goalkeeper" : null, `${r?.matches ?? 0} ${r?.matches === 1 ? "match" : "matches"}`, `${fmt(r?.minutes)} minutes`,
+              {[p.keeper ? "Goalkeeper" : null, p.loan ?? null, `${r?.played ?? 0} ${r?.played === 1 ? "match" : "matches"}`,
+                !p.keeper && r && r.played > r.matches ? `${r.played - r.matches} in goal (not rated)` : null, `${fmt(r?.playedMin)} minutes`,
                 `${r?.goals ?? 0} ${r?.goals === 1 ? "goal" : "goals"}`, `${r?.assists ?? 0} ${r?.assists === 1 ? "assist" : "assists"}`].filter(Boolean).join(", ")}
             </p>
           </div>

@@ -56,7 +56,7 @@ export default function Home() {
               {topRated.map((r, i) => (
                 <li key={r.id}>
                   <span className="pos">{i + 1}</span>
-                  <Who player={people.get(r.id)} sub={`${plural(r.matches, "match")}, ${fmt(r.minutes)} min, ${r.goals} G, ${r.assists} A`} />
+                  <Who player={people.get(r.id)} sub={`${plural(r.played, "match")}, ${fmt(r.playedMin)} min, ${r.goals} G, ${r.assists} A`} />
                   <Rating value={r.avgRating} />
                 </li>
               ))}

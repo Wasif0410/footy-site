@@ -185,8 +185,12 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
                 : `Points in ${mmss(r.minutes * 60)} on the pitch`}</span>
               <b>{signed(r.points)}</b>
             </li>
-            <li><span>What the team&apos;s average player makes in that time ({f.team_per_hour.toFixed(1)} an hour)</span><b>{signed(r.expected)}</b></li>
-            <li><span>Above the average</span><b>{signed(r.above)}</b></li>
+            {f.compare === "fixed" ? null : (
+              <>
+                <li><span>What the team&apos;s average player makes in that time ({f.team_per_hour.toFixed(1)} an hour)</span><b>{signed(r.expected)}</b></li>
+                <li><span>Above the average</span><b>{signed(r.above)}</b></li>
+              </>
+            )}
             <li className="result">
               <span>{f.baseline.toFixed(1)} + {f.spread} × curve({signed(r.above)} ÷ {f.scale})</span>
               <b>{r.rating.toFixed(1)}</b>

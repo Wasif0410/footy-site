@@ -127,7 +127,7 @@ export default async function Overview({ params }: { params: Promise<{ id: strin
             <Bar value={m.review.checked} max={m.review.events} /></div>
           {m.review.claude ? <div className="trust"><span>Our moments, by Claude from the video</span>
             <b>{m.review.claude} of {m.review.events}</b><Bar value={m.review.claude} max={m.review.events} /></div> : null}
-          {m.review.waiting ? <p className="note">{m.review.waiting} moments are still waiting for a check and aren&apos;t counted yet.</p> : null}
+          {m.review.waiting && !m.review.players_checked ? <p className="note">{m.review.waiting} moments are still waiting for a check and aren&apos;t counted yet.</p> : null}
         </section>
       </div>
     </div>

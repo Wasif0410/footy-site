@@ -35,7 +35,7 @@ export default function Stats() {
   const rows: Row[] = season.map((r) => ({
     id: r.id,
     cells: {
-      player: <Who player={people.get(r.id)} />, mp: r.matches, min: fmt(r.minutes),
+      player: <Who player={people.get(r.id)} />, mp: r.played, min: fmt(r.playedMin),
       rating: <Rating value={r.avgRating} />, best: fmt(r.bestRating, 1),
       g: r.goals, a: r.assists, sh: `${r.shots} (${r.shotsOnTarget})`, pc: `${r.passes}/${r.passesAttempted}`,
       pp: r.passesAttempted ? pct(r.passPct) : "–", tk: r.tackles, in: r.interceptions, to: r.touches,
@@ -43,7 +43,7 @@ export default function Stats() {
       km: `${fmt(r.distanceKm, 1)} km`, ts: r.topSpeed ? `${r.topSpeed.toFixed(1)} km/h` : "–", sp: r.sprints,
     },
     sort: {
-      player: people.get(r.id)?.name ?? "", mp: r.matches, min: r.minutes, rating: r.avgRating, best: r.bestRating,
+      player: people.get(r.id)?.name ?? "", mp: r.played, min: r.playedMin, rating: r.avgRating, best: r.bestRating,
       g: r.goals, a: r.assists, sh: r.shots, pc: r.passes, pp: r.passesAttempted ? r.passPct : null, tk: r.tackles,
       in: r.interceptions, to: r.touches, lo: r.turnovers, mk: -r.mistakePoints, km: r.distanceKm, ts: r.topSpeed, sp: r.sprints,
     },

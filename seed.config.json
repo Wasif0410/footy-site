@@ -19,10 +19,25 @@
         "us": 2,
         "them": 10
       }
+    },
+    "oct28": {
+      "opponent": "Lads FC",
+      "competition": "Rec League",
+      "venue": "The Dome",
+      "video": {
+        "youtube": "xPrnhLD_faQ",
+        "offset": 0,
+        "local": "http://localhost:8766/api/matches/oct28/video"
+      },
+      "score": {
+        "us": 4,
+        "them": 2
+      }
     }
   },
   "exclude_matches": [
-    "sample"
+    "sample",
+    "test5"
   ],
   "photos": true,
   "clips": true,
@@ -36,5 +51,8 @@
       "result": "L",
       "score": null
     }
-  ]
+  ],
+  "loans": {
+    "18": "One-day loan against Lads FC, in Praneet's #8 shirt"
+  }
 }

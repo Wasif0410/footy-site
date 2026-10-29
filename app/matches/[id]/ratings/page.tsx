@@ -13,9 +13,17 @@ export default async function Ratings({ params }: { params: Promise<{ id: string
     <div className="page">
       <section className="section">
         <SectionHead title="Ratings"
-          note={f ? `Every action is worth points: good ones add, mistakes take away. Each player's points are compared with what the team's average player makes in the same time, and a player who keeps up the average gets ${f.baseline.toFixed(1)}.` : undefined}
+          note={f ? (f.compare === "fixed"
+            ? `Every action is worth points: good ones add, mistakes take away. Everyone starts from ${f.baseline.toFixed(1)}, and a teammate's goals don't pull anyone down.`
+            : `Every action is worth points: good ones add, mistakes take away. Each player's points are compared with what the team's average player makes in the same time, and a player who keeps up the average gets ${f.baseline.toFixed(1)}.`) : undefined}
           more={{ href: "/about/", label: "How ratings work" }} />
-        {m.review.waiting ? (
+        {m.review.players_checked ? (
+          <p className="note" style={{ marginTop: 0, marginBottom: "1rem" }}>
+            Claude followed {m.review.players_checked} of our players through every moment the ball came near them, so their passes,
+            tackles, runs and losses are what the video shows, not the system&apos;s guesses. Each line on a player&apos;s sheet links
+            to those moments.
+          </p>
+        ) : m.review.waiting ? (
           <p className="note" style={{ marginTop: 0, marginBottom: "1rem" }}>
             {m.review.waiting} of our moments are still waiting for a check and don&apos;t count in anyone&apos;s rating yet, so these ratings will
             move as they&apos;re checked.
