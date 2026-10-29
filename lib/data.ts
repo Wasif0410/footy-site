@@ -28,6 +28,8 @@ export type BoxStats = {
   goals: number; assists: number; passes: number; passes_attempted: number; pass_pct: number | null; receptions: number;
   passes_forward: number; shots: number; shots_on_target: number; tackles_won: number; interceptions: number;
   turnovers: number; dispossessed: number; touches: number; carries_forward: number; possession_s: number;
+  clearances?: number;                       // counted by the per-player check
+  pressures?: number; press_s?: number;      // closing down their player on the ball (from tracking)
 };
 
 export type RatingLine = {
@@ -41,6 +43,7 @@ export type Running = {
 
 export type MatchPlayer = {
   id: number; minutes: number; stints: number; rating: number | null; keeper: boolean;
+  position?: string | null;                  // where they played in this match (CB, CDM, RM, ST...)
   band?: number | null;                      // how far the rating could move as its events are checked
   points: number | null; per_hour: number | null; expected: number | null; above: number | null;
   judged_min: number | null; seen_min: number | null; estimated: string[];
@@ -72,6 +75,7 @@ export type MatchSummary = Pick<Match, "id" | "date" | "venue" | "opponent" | "c
 // keeper: only ever played in goal; loan: a guest for a day (shown apart from the squad)
 export type Player = {
   id: number; slug: string; name: string; number: number | null; keeper: boolean; photo: string | null; loan?: string | null;
+  position?: string | null;                  // where they usually play
 };
 
 export type Formula = {

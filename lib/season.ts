@@ -13,10 +13,19 @@ export type SeasonPlayer = {
   distanceKm: number; topSpeed: number | null; sprints: number; waiting: number;
   keeper: boolean;                           // only ever played in goal
   played: number; playedMin: number;         // every match, in goal too (the rest counts outfield games only)
+  clearances: number; pressures: number; pressS: number;
+  position: string | null;                   // where they played most minutes (outfield games)
   sections: Record<string, number>;          // rating points by section (Attacking, On the ball, Defending, ...)
 };
 
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0);
+
+// the position a player spent most minutes in (null when no match says)
+function mainPosition(ls: MatchPlayer[]): string | null {
+  const mins = new Map<string, number>();
+  ls.forEach((l) => { if (l.position) mins.set(l.position, (mins.get(l.position) ?? 0) + l.minutes); });
+  return [...mins].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
+}
 
 // mistakes as the rating counts them: passes cut out, tackled, ball out of play (any line that costs points)
 const mistakesOf = (p: MatchPlayer) => p.breakdown.filter((b) => b.each < 0);
@@ -51,6 +60,8 @@ export function seasonPlayers(ms: Match[] = matches()): SeasonPlayer[] {
       topSpeed: speeds.length ? Math.max(...speeds) : null, sprints: sum(ls.map((l) => l.running.sprints || 0)),
       waiting: sum(ls.map((l) => l.waiting || 0)), sections, keeper: !outfield.length,
       played: all.length, playedMin: sum(all.map((l) => l.minutes)),
+      clearances: st("clearances"), pressures: st("pressures"), pressS: st("press_s"),
+      position: mainPosition(ls),
     };
   });
 }

@@ -47,7 +47,7 @@ export default function Players() {
       ) : null}
       <section className="section">
         <SectionHead title="How the cards are rated"
-          note="Overall is mostly the player's average match rating, topped up by their attributes. Each attribute is a rate per minute on camera, set against the squad: the team's average is 65, twice it is 85, and 90+ takes something special. A short spell counts for less: every player's rate is blended with 10 minutes at the team's average, so a few lucky minutes can't make a 94. Position is where most of their rating points come from: attack, on the ball (MID) or defending." />
+          note="Each attribute ranks a player against the squad on a few measures, each a rate per minute on camera: the best in the squad gets about 90, the least about 45. A short spell counts for less, so a cameo has to show something to rate well. The overall is half their average match rating and half their attributes weighted for their position: a centre-back's leans on defending and physical, a midfielder's on passing, a winger's on pace and dribbling, a striker's on shooting. Players seen only briefly are pulled a little toward 55." />
         <ul className="card-notes">
           {(Object.keys(ATTR_NOTES) as Attr[]).map((k) => <li key={k}><b>{k}</b>{ATTR_NOTES[k].replace(/^[A-Za-z]+: /, "")}</li>)}
         </ul>
