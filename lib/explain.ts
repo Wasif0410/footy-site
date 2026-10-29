@@ -50,7 +50,20 @@ export function whyRating(r: MatchPlayer, name: string, f: Formula): string[] {
   out.push(r.checked
     ? "Every moment the ball came near them was checked from the video, and each line links to it."
     : "Counted from the system's events and the ones checked so far; each line links to its moments.");
+  out.push(timeLine(r));
   return out;
+}
+
+// how much of their time was analysed, and how much we missed
+function timeLine(r: MatchPlayer): string {
+  const played = r.minutes, named = Math.min(r.seen_min ?? 0, played), unnamed = Math.max(0, played - named);
+  if (r.checked) {
+    return `Time analysed: all ${mmss(played * 60)} played. The camera had them named for ${mmss(named * 60)}; the other `
+      + `${mmss(unnamed * 60)} were found by look and checked by eye. Missed: moments the ball tracker lost the ball `
+      + "(it follows it about 7 in every 10 seconds), so a few touches may not be counted.";
+  }
+  return `Time analysed: ${mmss(named * 60)} of ${mmss(played * 60)} played, the time the camera had them named. `
+    + `Missed: ${mmss(unnamed * 60)} when they couldn't be named, which counts neither for nor against them.`;
 }
 
 // what each attribute is built from, in this player's own numbers
@@ -78,6 +91,10 @@ export function whyCard(card: Card, p: SeasonPlayer, name: string, _base: Baseli
     `Strongest: ${best.map((k) => `${ATTR_NAME[k]} ${card.attrs[k]} (${evidence(k, p)})`).join("; ")}.`,
     `Weakest: ${worst.map((k) => `${ATTR_NAME[k]} ${card.attrs[k]} (${evidence(k, p)})`).join("; ")}.`,
   ];
+  const missed = Math.max(0, p.minutes - p.judgedMin);
+  out.push(`Time analysed: ${Math.round(p.judgedMin)} of ${Math.round(p.minutes)} outfield minutes this season`
+    + (missed >= 1 ? `; ${Math.round(missed)} minutes missed, when they couldn't be named and their games haven't had a per-player check.`
+      : ", every minute."));
   if (p.judgedMin < 15) out.push(`Only ${Math.round(p.judgedMin)} minutes judged so far, so the card is pulled toward the middle until there's more to go on.`);
   return out;
 }
