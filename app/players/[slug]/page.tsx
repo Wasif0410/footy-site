@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { FutCard } from "@/components/fut-card";
 import { MomentCard } from "@/components/moment-card";
 import { cardFor, teamBaseline } from "@/lib/cards";
+import { whyCard } from "@/lib/explain";
 import { ClipCard, Pitch, Rating, SectionHead } from "@/components/ui";
 import { playerBySlug, playerMatches, players, site } from "@/lib/data";
 import { fmt, matchClock, mmss, pct, shortDate, signed, winTag } from "@/lib/format";
@@ -52,6 +53,12 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
         </div>
       </section>
       <main className="wrap page">
+        {card && r ? (
+          <section className="section">
+            <SectionHead title="Why this card" />
+            <div className="why">{whyCard(card, r, p.name, teamBaseline(season)).map((t, i) => <p key={i}>{t}</p>)}</div>
+          </section>
+        ) : null}
         <section className="section">
           <SectionHead title="Season" />
           <div className="figures">

@@ -659,3 +659,8 @@ a.fut:focus-visible { outline: none; filter: drop-shadow(0 0 0 var(--focus)) dro
 .band { margin-left: 0.35rem; font-size: 0.75rem; color: var(--ink-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .side-rate { display: inline-flex; align-items: baseline; }
 .sure { display: block; font-size: 0.68rem; color: var(--ink-3); white-space: nowrap; }
+
+/* plain-words reasons for a rating or a card */
+.why { display: grid; gap: 0.45rem; margin: 0.4rem 0 1rem; max-width: 70ch; }
+.why p { margin: 0; line-height: 1.5; color: var(--ink-2); }
+.why p:first-child { color: var(--ink); }

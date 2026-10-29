@@ -81,7 +81,8 @@ export type Player = {
 
 export type Formula = {
   baseline: number; spread: number; scale: number; per: number; min_minutes: number; judge_on: string;
-  compare?: "team" | "fixed";               // fixed: everyone from the same baseline, points on their own
+  compare?: "team" | "fixed";
+  roles?: Record<string, string>; role_weights?: Record<string, Record<string, number>>;   // position groups and their section weights               // fixed: everyone from the same baseline, points on their own
   min_named_minutes: number; team_per_hour: number; sections: string[];
   sure?: { checked: number; claude: number; auto: number; pending: number };
   actions: { key: string; label: string; section: string; each: number }[];

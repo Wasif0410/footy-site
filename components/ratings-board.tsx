@@ -2,6 +2,7 @@
 // The match's ratings as the app's Ratings tab shows them: everyone ranked, and beside the table the
 // picked player's points sheet. Every line opens to the moments behind it, each with a link to watch
 // it; then how the points become the rating. On a phone the sheet slides up over the page.
+import { whyRating } from "@/lib/explain";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Formula, MatchPlayer, Player, RatingLine } from "@/lib/data";
@@ -134,6 +135,8 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
       </div>
       {note ? <p className="side-note">{note}</p> : null}
       {r.waiting ? <p className="side-note">{r.waiting} of {name}&apos;s moments are still waiting for a check and don&apos;t count yet.</p> : null}
+      <h4>Why {r.rating !== null ? r.rating.toFixed(1) : "no rating"}</h4>
+      <div className="why">{whyRating(r, name, f).map((t, i) => <p key={i}>{t}</p>)}</div>
       <h4>How the points add up</h4>
       <p className="muted small">Open a line to see every moment behind it and watch it.</p>
       <div role="table" aria-label={`${name}'s points`}>
