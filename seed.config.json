@@ -33,11 +33,26 @@
         "us": 4,
         "them": 2
       }
+    },
+    "oct30": {
+      "opponent": "Asli Madrid",
+      "competition": "Rec League",
+      "venue": "The Dome (big hall)",
+      "video": {
+        "youtube": "ikx_wrI5tfU",
+        "offset": 0,
+        "local": "http://localhost:8766/api/matches/oct30/video"
+      },
+      "score": {
+        "us": 4,
+        "them": 2
+      }
     }
   },
   "exclude_matches": [
     "sample",
-    "test5"
+    "test5",
+    "oct30test"
   ],
   "photos": true,
   "clips": true,
@@ -53,6 +68,6 @@
     }
   ],
   "loans": {
-    "18": "One-day loan against Lads FC, in Praneet's #8 shirt"
+    "18": "On loan in Praneet's #8 shirt (Lads FC, Asli Madrid)"
   }
 }
