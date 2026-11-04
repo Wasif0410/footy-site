@@ -1,0 +1,137 @@
+{
+ "weeks": [
+  {
+   "id": "oct30",
+   "title": "30 Oct vs Asli Madrid",
+   "from": "2026-10-30",
+   "to": "2026-10-30",
+   "matches": [
+    "oct30"
+   ],
+   "reel": {
+    "src": "/media/tv/oct30/reel.mp4",
+    "poster": "/media/tv/oct30/reel.jpg",
+    "length": 71.72,
+    "music": "Original track made for the reel"
+   },
+   "top": [
+    {
+     "rank": 1,
+     "kind": "Goal",
+     "player_id": 5,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 47,
+     "half": 2,
+     "extra": "assisted by Aryan",
+     "t": 58.83
+    },
+    {
+     "rank": 2,
+     "kind": "Goal",
+     "player_id": 6,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 40,
+     "half": 2,
+     "extra": null,
+     "t": 50.39
+    },
+    {
+     "rank": 3,
+     "kind": "Goal",
+     "player_id": 2,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 17,
+     "half": 1,
+     "extra": "assisted by Kaif",
+     "t": 41.95
+    },
+    {
+     "rank": 4,
+     "kind": "Goal",
+     "player_id": 7,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 10,
+     "half": 1,
+     "extra": null,
+     "t": 33.52
+    },
+    {
+     "rank": 5,
+     "kind": "Press",
+     "player_id": 17,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 17,
+     "half": 1,
+     "extra": "and won the ball",
+     "t": 29.3
+    },
+    {
+     "rank": 6,
+     "kind": "Shot on target",
+     "player_id": 9,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 32,
+     "half": 2,
+     "extra": null,
+     "t": 23.2
+    },
+    {
+     "rank": 7,
+     "kind": "Run with the ball",
+     "player_id": 5,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 8,
+     "half": 1,
+     "extra": null,
+     "t": 17.58
+    },
+    {
+     "rank": 8,
+     "kind": "Interception",
+     "player_id": 18,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 38,
+     "half": 2,
+     "extra": null,
+     "t": 13.83
+    },
+    {
+     "rank": 9,
+     "kind": "Press",
+     "player_id": 7,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 38,
+     "half": 2,
+     "extra": "and won the ball",
+     "t": 8.2
+    },
+    {
+     "rank": 10,
+     "kind": "Run with the ball",
+     "player_id": 15,
+     "match": "oct30",
+     "opponent": "Asli Madrid",
+     "minute": 3,
+     "half": 1,
+     "extra": null,
+     "t": 3.52
+    }
+   ],
+   "player_of_week": {
+    "id": 7,
+    "line": "1 goal · rating 8.5",
+    "award": "Player of the match",
+    "t": 67.27
+   }
+  }
+ ]
+}

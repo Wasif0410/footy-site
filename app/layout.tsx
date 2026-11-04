@@ -25,6 +25,7 @@ const THEME = `try{if(localStorage.getItem("theme")==="light")document.documentE
 const LINKS = [
   { href: "/", label: "Home" },
   { href: "/matches/", label: "Matches" },
+  { href: "/tv/", label: "TV", icon: "tv" as const },
   { href: "/players/", label: "Players" },
   { href: "/leaderboards/", label: "Leaderboards" },
   { href: "/stats/", label: "Stats" },

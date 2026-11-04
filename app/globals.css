@@ -667,3 +667,58 @@ a.fut:focus-visible { outline: none; filter: drop-shadow(0 0 0 var(--focus)) dro
 .why { display: grid; gap: 0.45rem; margin: 0.4rem 0 1rem; max-width: 70ch; }
 .why p { margin: 0; line-height: 1.5; color: var(--ink-2); }
 .why p:first-child { color: var(--ink); }
+
+/* Seven XI TV: the week's reel, and its moments to jump to */
+.tv-show { display: grid; gap: 1.2rem; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 1000px) { .tv-show { grid-template-columns: minmax(0, 1fr) 20rem; align-items: start; } }
+.tv-reel { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 14px; overflow: hidden; }
+.tv-reel video { position: absolute; inset: 0; width: 100%; height: 100%; }
+.tv-chapters { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.35rem; }
+.tv-chapters button { all: unset; box-sizing: border-box; width: 100%; cursor: pointer; display: grid; grid-template-columns: 2.6rem 1fr auto;
+  gap: 0.7rem; align-items: center; padding: 0.5rem 0.7rem; border-radius: 10px; border: 1px solid var(--box-line); background: var(--box); }
+.tv-chapters button:hover { border-color: var(--club); }
+.tv-chapters button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tv-chapters button[aria-current="true"] { border-color: var(--club); box-shadow: inset 3px 0 0 var(--club); }
+.tv-chapters .r { font-weight: 800; font-stretch: 75%; font-size: 1.25rem; color: var(--club); text-align: center; }
+.tv-chapters .w { display: grid; min-width: 0; }
+.tv-chapters .t { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The TV mascot: bounces beside the TV link, and wanders the TV page's header */
+.tv-icon { overflow: visible; flex: none; }
+.tv-icon .tv-body { fill: var(--club); }
+.tv-icon .tv-screen { fill: #0e0f12; stroke: rgba(255, 255, 255, 0.25); stroke-width: 0.6; }
+.tv-icon .tv-play { fill: #fff; }
+.tv-icon .tv-knob { fill: #fff; opacity: 0.85; }
+.tv-icon .tv-ant line, .tv-icon .tv-foot { stroke: var(--club); stroke-width: 1.8; stroke-linecap: round; }
+.tv-icon .tv-ant circle { fill: var(--club); }
+.tv-icon .tv-ant { transform-origin: 16px 8px; }
+.site-nav a.with-icon { display: inline-flex; align-items: center; gap: 0.4rem; }
+.nav-tv { animation: tv-hop 1.6s cubic-bezier(.3, 0, .3, 1) infinite; transform-origin: 50% 100%; }
+.nav-tv .tv-ant { animation: tv-wiggle 1.6s ease-in-out infinite; }
+.nav-tv .tv-screen { animation: tv-glow 3.2s ease-in-out infinite; }
+@keyframes tv-hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  12% { transform: translateY(0) scale(1.12, 0.86); }
+  40% { transform: translateY(-6px) rotate(-6deg) scale(0.95, 1.06); }
+  62% { transform: translateY(0) rotate(4deg) scale(1.08, 0.9); }
+  78% { transform: translateY(-2px) rotate(0) scale(1, 1); }
+}
+@keyframes tv-wiggle { 0%, 100% { transform: rotate(0); } 40% { transform: rotate(-12deg); } 70% { transform: rotate(10deg); } }
+@keyframes tv-glow { 0%, 100% { fill: #0e0f12; } 50% { fill: #2a1720; } }
+.tv-hero { position: relative; height: 0; }
+.tv-hero .tv-icon { position: absolute; right: 4%; top: -5.2rem; width: 84px; height: 84px;
+  animation: tv-roam 9s ease-in-out infinite; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.35)); }
+.tv-hero .tv-ant { animation: tv-wiggle 1.2s ease-in-out infinite; }
+.tv-hero .tv-screen { animation: tv-glow 2.4s ease-in-out infinite; }
+@keyframes tv-roam {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  10% { transform: translate(-18px, -22px) rotate(-8deg); }
+  20% { transform: translate(-40px, 0) rotate(0) scale(1.08, 0.9); }
+  32% { transform: translate(-70px, -26px) rotate(8deg); }
+  44% { transform: translate(-96px, 0) rotate(0) scale(1.08, 0.9); }
+  58% { transform: translate(-60px, -30px) rotate(-6deg); }
+  72% { transform: translate(-24px, 0) rotate(0) scale(1.08, 0.9); }
+  86% { transform: translate(-8px, -14px) rotate(5deg); }
+}
+@media (max-width: 640px) { .tv-hero .tv-icon { width: 56px; height: 56px; top: -4rem; right: 2%; } }
+@media (prefers-reduced-motion: reduce) { .nav-tv, .nav-tv *, .tv-hero .tv-icon, .tv-hero .tv-icon * { animation: none !important; } }
