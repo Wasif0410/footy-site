@@ -164,7 +164,7 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
                     <ol>
                       {b.moments.map((m, i) => (
                         <li key={i}>
-                          <span className="when">{matchClock(m.t, periods)}</span>
+                          <span className="when">{matchClock(m.t, periods)}<small>video {mmss(m.t)}</small></span>
                           <span>{m.text}</span>
                           <Link href={`/matches/${matchId}/review/?t=${m.t}`}>Watch</Link>
                         </li>

@@ -299,7 +299,7 @@ export function Review({ screens, moments, players, lineup, periods, frame, vide
             <ol className="feed">
               {here.map((m, i) => (
                 <li key={i} className={`${tone(m)}${m.kind === "goal" ? " goal" : ""}${Math.abs(m.t - t) < 1.5 ? " live" : ""}`}>
-                  <span className="m">{minute(m.minute)}</span>
+                  <span className="m">{minute(m.minute)}<small className="vt">video {mmss(m.t)}</small></span>
                   <span className="kind-cell"><KindTag kind={m.kind} /></span>
                   <span className="text">{describe(m, opponent)}</span>
                   <button type="button" className="watch" onClick={() => seek(m.t - 2)}>Watch</button>

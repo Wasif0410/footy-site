@@ -1,7 +1,7 @@
 // Small building blocks shared by every page. They render on the server at build time.
 import Link from "next/link";
 import type { Clip, Goal, Kind, Player, TeamStat } from "@/lib/data";
-import { KIND_LABEL, minute, ratingBand } from "@/lib/format";
+import { KIND_LABEL, minute, mmss, ratingBand } from "@/lib/format";
 
 // The numbered shirt, drawn as the app draws it.
 export function Shirt({ number, size, off = false }: { number: number | null | undefined; size?: "sm" | "lg"; off?: boolean }) {
@@ -91,12 +91,12 @@ export function GoalTimeline({ goals, halves }: { goals: Goal[]; halves: number[
   );
 }
 
-export function ClipCard({ clip, title, sub, min }: { clip: Clip; title: string; sub?: string; min?: number }) {
+export function ClipCard({ clip, title, sub, min, t }: { clip: Clip; title: string; sub?: string; min?: number; t?: number }) {
   return (
     <figure className="clip">
       <video src={clip.src} poster={clip.poster} controls preload="none" playsInline muted />
       <figcaption>
-        {min !== undefined ? <span className="m">{minute(min)}</span> : null}
+        {min !== undefined ? <span className="m">{minute(min)}{t !== undefined ? <small className="vt">video {mmss(t)}</small> : null}</span> : null}
         <span className="t">{title}</span>
         {sub ? <span className="s">{sub}</span> : null}
       </figcaption>

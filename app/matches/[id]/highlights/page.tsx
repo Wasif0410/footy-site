@@ -23,7 +23,7 @@ export default async function Highlights({ params }: { params: Promise<{ id: str
         {goals.length ? (
           <div className="clips">
             {goals.map((g, i) => (
-              <ClipCard key={i} clip={g.clip!} min={g.minute} title={g.team === 0 ? g.scorer?.name ?? team : m.opponent}
+              <ClipCard key={i} clip={g.clip!} min={g.minute} t={g.t} title={g.team === 0 ? g.scorer?.name ?? team : m.opponent}
                 sub={g.team === 0 ? (g.assist ? `assisted by ${g.assist.name}` : `for ${team}`) : "goal against"} />
             ))}
           </div>
@@ -46,7 +46,7 @@ export default async function Highlights({ params }: { params: Promise<{ id: str
           <SectionHead title="Shots" />
           <div className="clips">
             {shots.map((t, i) => (
-              <ClipCard key={i} clip={t.clip!} min={t.minute} title={t.from?.team === 0 ? t.from.name : m.opponent}
+              <ClipCard key={i} clip={t.clip!} min={t.minute} t={t.t} title={t.from?.team === 0 ? t.from.name : m.opponent}
                 sub={t.on_target ? "on target" : "off target"} />
             ))}
           </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Bar, Compare, GoalTimeline, Pitch, Rating, SectionHead, Who } from "@/components/ui";
 import { match, playerById, site } from "@/lib/data";
-import { fmt, minute } from "@/lib/format";
+import { fmt, minute, mmss } from "@/lib/format";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const m = match((await params).id);
@@ -34,7 +34,7 @@ export default async function Overview({ params }: { params: Promise<{ id: strin
           <ol className="goal-list" style={{ marginTop: "1rem" }}>
             {m.goals.map((g, i) => (
               <li key={i} className={g.team === 0 ? "us" : "them"}>
-                <span className="m">{minute(g.minute)}</span>
+                <span className="m">{minute(g.minute)}<small className="vt">video {mmss(g.t)}</small></span>
                 <span>
                   {g.team === 0
                     ? <><span className="who-scored">{g.scorer?.name ?? "Unknown scorer"}</span>{g.assist ? <span className="muted">, assisted by {g.assist.name}</span> : null}</>

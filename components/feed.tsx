@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { Moment, Player } from "@/lib/data";
-import { describe, KEY_KINDS, minute, tone } from "@/lib/format";
+import { describe, KEY_KINDS, minute, mmss, tone } from "@/lib/format";
 import { KindTag } from "./ui";
 
 export function Feed({ moments, players, opponent, matchId }: { moments: Moment[]; players: Player[]; opponent: string; matchId: string }) {
@@ -32,7 +32,7 @@ export function Feed({ moments, players, opponent, matchId }: { moments: Moment[
       <ol className="feed">
         {shown.map((m, i) => (
           <li key={`${m.t}-${i}`} className={`${tone(m)}${m.kind === "goal" ? " goal" : ""}`}>
-            <span className="m">{minute(m.minute)}</span>
+            <span className="m">{minute(m.minute)}<small className="vt">video {mmss(m.t)}</small></span>
             <span className="kind-cell"><KindTag kind={m.kind} /></span>
             <span className="text">{describe(m, opponent)}{m.checked ? <span className="tick">checked</span> : m.claude ? <span className="tick">checked by Claude</span> : null}</span>
             <Link className="watch" href={`/matches/${matchId}/review/?t=${m.t}`}>Watch</Link>
