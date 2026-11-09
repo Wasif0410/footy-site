@@ -1,6 +1,7 @@
 "use client";
 // Running, as the app's Movement tab shows it: distance, pace, top speed and sprints for everyone,
 // and beside the table the picked player's heatmap. On a phone the heatmap slides up over the page.
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { MatchPlayer, Player } from "@/lib/data";
 import { fmt, mmss } from "@/lib/format";
@@ -76,10 +77,7 @@ export function MovementBoard({ rows, people, pitch }: { rows: MatchPlayer[]; pe
             })}
           </tbody>
         </table>
-        <p className="note">
-          Players are measured while the camera has them named, so distance is their pace while tracked times their time on the pitch
-          (warm-up and half-time left out). Top speed is the fastest held for a full second. Pick a player to see where they played.
-        </p>
+        <p className="note">Pick a player to see where they played. <Link className="more" href="/about/#checks">How running is measured</Link></p>
       </div>
       {open ? <div className="scrim" onClick={() => setOpen(false)} aria-hidden="true" /> : null}
       <aside className={`side${open ? " open" : ""}`} aria-label="Where they played">

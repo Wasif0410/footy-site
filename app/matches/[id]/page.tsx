@@ -55,8 +55,7 @@ export default async function Overview({ params }: { params: Promise<{ id: strin
         <section className="span-5">
           <SectionHead title="Team stats" />
           <Compare stats={m.team_stats} us={s.team.name} them={m.opponent} />
-          <p className="note">Both teams are counted the same way, as the system found them. Our checks are applied to ours; {m.opponent}&apos;s
-            aren&apos;t checked. A pass counts as failed if it&apos;s cut out or goes out of play. Possession is estimated from ball tracking.</p>
+          <p className="note"><Link className="more" href="/about/#checks">How these are counted</Link></p>
         </section>
       </div>
 
