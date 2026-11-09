@@ -1,0 +1,46 @@
+/* The title screen (components/start-screen.tsx). Hidden unless the script in <head> marked <html data-intro="1">. It
+   draws its own stadium, the same photo as the page behind, so nothing of the page shows through. */
+.start { display: none; }
+html[data-intro="1"] .start { position: fixed; inset: 0; z-index: 1000; display: block; transition: opacity 0.45s var(--ease), transform 0.45s var(--ease); }
+html[data-intro="1"] body { overflow: hidden; }
+.start.is-leaving { opacity: 0; transform: scale(1.03); pointer-events: none; }
+
+.start-btn { all: unset; box-sizing: border-box; position: relative; display: grid; grid-template-rows: 1fr auto auto; justify-items: center;
+  width: 100%; height: 100%; padding: max(2rem, env(safe-area-inset-top)) 1.25rem max(1.6rem, env(safe-area-inset-bottom)); cursor: pointer;
+  text-align: center; color: #fff; -webkit-tap-highlight-color: transparent;
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 42%, rgba(3, 5, 9, 0.15), rgba(3, 5, 9, 0.7) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.55) 0%, rgba(3, 5, 9, 0.2) 35%, rgba(3, 5, 9, 0.3) 65%, rgba(3, 5, 9, 0.9) 100%),
+    #05070c url(/media/ui/stadium-2.jpg) center 55% / cover no-repeat; }
+.start-btn:focus-visible .start-press { outline: 2px solid var(--yel); outline-offset: 0.6rem; }
+
+/* the crest and the club's name, in the middle of the upper part */
+.start-mark { align-self: center; display: grid; justify-items: center; gap: 0.5rem; animation: start-rise 0.7s var(--ease) both; }
+.start-crest { width: clamp(5.5rem, 15vw, 8.5rem); height: auto; filter: drop-shadow(0 0.6rem 1.4rem rgba(0, 0, 0, 0.65)); }
+.start-name { margin-top: 0.4rem; font-family: var(--cond); font-weight: 800; font-size: clamp(2.8rem, 9vw, 5.4rem); line-height: 0.95;
+  letter-spacing: 0.02em; text-transform: uppercase; text-shadow: 0 0.2rem 1.2rem rgba(0, 0, 0, 0.7); }
+.start-name b { color: var(--yel); font-weight: 800; }
+.start-sub { font-family: var(--cond); font-weight: 600; font-size: clamp(1rem, 2.4vw, 1.3rem); letter-spacing: 0.08em; color: var(--ink-2); }
+
+/* the game's prompt, pulsing */
+.start-press { margin-bottom: clamp(1.6rem, 6vh, 3.4rem); padding: 0.55rem 1.4rem; font-family: var(--cond); font-weight: 700;
+  font-size: clamp(1.1rem, 2.8vw, 1.5rem); letter-spacing: 0.2em; text-transform: uppercase;
+  background: linear-gradient(90deg, transparent, rgba(3, 5, 9, 0.7) 18%, rgba(3, 5, 9, 0.7) 82%, transparent);
+  border-block: 1px solid rgba(246, 211, 60, 0.55); animation: start-pulse 1.7s ease-in-out 0.6s infinite; }
+.start-tap { display: none; }
+@media (hover: none) { .start-key { display: none; } .start-tap { display: inline; } }
+.start-note { max-width: 32rem; font-size: 0.82rem; line-height: 1.45; color: var(--ink-3); }
+
+@keyframes start-rise { from { opacity: 0; transform: translateY(1rem); } }
+@keyframes start-pulse { 50% { opacity: 0.35; } }
+
+@media (max-width: 700px) {
+  .start-btn { background:
+    radial-gradient(ellipse 80% 45% at 50% 40%, rgba(3, 5, 9, 0.15), rgba(3, 5, 9, 0.72) 100%),
+    linear-gradient(180deg, rgba(3, 5, 9, 0.55) 0%, rgba(3, 5, 9, 0.2) 35%, rgba(3, 5, 9, 0.3) 65%, rgba(3, 5, 9, 0.9) 100%),
+    #05070c url(/media/ui/stadium-2-portrait.jpg) 25% bottom / cover no-repeat; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-intro="1"] .start { transition: none; }
+  .start-mark, .start-press { animation: none; }
+}

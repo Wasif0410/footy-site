@@ -5,6 +5,7 @@ import { Crest } from "@/components/crest";
 import { MusicPlayer } from "@/components/music-player";
 import { NavLinks } from "@/components/nav";
 import { ShareButton } from "@/components/share-button";
+import { START_SCRIPT, StartScreen } from "@/components/start-screen";
 import { UiSounds } from "@/components/ui-sounds";
 import { matches, site } from "@/lib/data";
 import { seasonTeam } from "@/lib/season";
@@ -49,9 +50,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const winShare = team.played ? (100 * team.won) / team.played : 0;
   const [first, ...rest] = s.team.name.split(" ");
   return (
-    <html lang="en" className={`${cond.variable} ${sans.variable}`} data-theme="dark">
+    // suppressHydrationWarning: START_SCRIPT may mark <html data-intro="1"> before React takes over
+    <html lang="en" className={`${cond.variable} ${sans.variable}`} data-theme="dark" suppressHydrationWarning>
+      <head>
+        {/* runs as the HTML is read, before the first paint: show the title screen once per visit
+            (components/start-screen.tsx). next/script would queue it until Next's code loads, after the page shows. */}
+        <script dangerouslySetInnerHTML={{ __html: START_SCRIPT }} />
+      </head>
       <body>
         <UiSounds />
+        <StartScreen first={first} rest={rest.join(" ")} />
         <header className="site-head">
           <div className="wrap head-bar">
             <Link className="wordmark" href="/" aria-label={`${s.team.name} home`}>
