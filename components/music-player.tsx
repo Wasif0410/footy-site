@@ -12,10 +12,9 @@ const VOLUME = MUSIC_VOLUME;
 const LAST_KEY = "music-last";
 const MUTE_KEY = MUSIC_MUTE_KEY;
 const TOAST_MS = 4200;
-// On a phone nothing plays, and no MP3 (4 to 8 MB) is fetched, until the visitor presses the speaker button: a touch to scroll is not a
-// request for sound, and it would cost them mobile data. Everywhere else the music starts as before.
-const PHONE = "(max-width: 640px)";
-// Browsers only allow sound after the visitor does something; any of these counts on one device or another.
+// The music is on by default everywhere, phones included; the speaker button mutes it, and that choice is remembered.
+// Browsers only allow sound after the visitor does something, so it starts on the first press or tap anywhere (any of
+// these counts on one device or another). No MP3 is fetched until a track is about to play.
 const GESTURES = ["pointerdown", "keydown", "touchstart", "pointerup", "touchend", "click"] as const;
 
 // One audio element for the whole page, and one track choice per page load (these survive React remounts).
@@ -54,7 +53,6 @@ export function MusicPlayer() {
   const [toastTop, setToastTop] = useState(112);
 
   const mutedRef = useRef(false);
-  const phoneRef = useRef(false);
   const current = useRef<Track | null>(null);
   const loaded = useRef<string | null>(null);        // the src currently set on the element
   const toasted = useRef<string | null>(null);       // the track the banner was last shown for
@@ -115,8 +113,7 @@ export function MusicPlayer() {
     setMounted(true);
     if (!TRACKS.length) return;
     const audio = getAudio();
-    phoneRef.current = window.matchMedia(PHONE).matches;
-    const isMuted = phoneRef.current || read(MUTE_KEY) === "1";
+    const isMuted = read(MUTE_KEY) === "1";       // on unless the visitor muted it before
     mutedRef.current = isMuted;
     setMuted(isMuted);
     sfx.setMuted(isMuted);          // the interface sounds follow the speaker button
@@ -179,7 +176,7 @@ export function MusicPlayer() {
     setMuted(next);
     // the button clicks for itself (data-sfx="none" below): before muting, after unmuting, so the press is heard either way
     if (next) { sfx.play("click"); sfx.setMuted(true); } else { sfx.setMuted(false); sfx.play("click"); }
-    if (!phoneRef.current) write(MUTE_KEY, next ? "1" : "0");
+    write(MUTE_KEY, next ? "1" : "0");
     if (next) {
       disarm();
       window.clearInterval(fadeTimer.current);
