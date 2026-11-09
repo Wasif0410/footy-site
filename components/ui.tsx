@@ -2,6 +2,7 @@
 import Link from "next/link";
 import type { Clip, Goal, Kind, Player, TeamStat } from "@/lib/data";
 import { KIND_LABEL, minute, mmss, ratingBand } from "@/lib/format";
+import { PhoneFold } from "./phone-fold";
 
 // The numbered shirt, drawn as the app draws it.
 export function Shirt({ number, size, off = false }: { number: number | null | undefined; size?: "sm" | "lg"; off?: boolean }) {
@@ -146,7 +147,9 @@ export function SectionHead({ title, note, more }: { title: string; note?: strin
     <div className="section-head">
       <div>
         <h2>{title}</h2>
-        {note ? <p style={{ marginTop: "0.35rem" }}>{note}</p> : null}
+        {note ? (note.length > 110
+          ? <PhoneFold summary="About this"><p style={{ marginTop: "0.35rem" }}>{note}</p></PhoneFold>
+          : <p style={{ marginTop: "0.35rem" }}>{note}</p>) : null}
       </div>
       {more ? <Link className="more" href={more.href}>{more.label}</Link> : null}
     </div>

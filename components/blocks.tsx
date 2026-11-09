@@ -4,6 +4,7 @@ import type { Match, MatchSummary, Player, Site } from "@/lib/data";
 import { longDate, minute, shortDate } from "@/lib/format";
 import type { Board, SeasonPlayer } from "@/lib/season";
 import { BOARDS, leaders } from "@/lib/season";
+import { Crest, OppCrest } from "./crest";
 import { Shirt } from "./ui";
 
 const unfound = (n: number) => (n ? `${n} unable to find` : null);
@@ -18,24 +19,26 @@ export function MatchHead({ m, team }: { m: Match; team: Site["team"] }) {
   });
   const ours = [...[...byScorer].map(([n, mins]) => `${n} ${mins.map(minute).join(", ")}`), unfound(m.goals_missing.us)].filter(Boolean);
   const theirs = [m.goals.filter((g) => g.team === 1).map((g) => minute(g.minute)).join(", "), unfound(m.goals_missing.them)].filter(Boolean);
+  const result = won ? "win" : lost ? "loss" : "draw";
   return (
     <section className="match-head">
       <div className="wrap">
+        <h1 className="sr-only">{`${team.name} ${m.score.us}–${m.score.them} ${m.opponent}, a ${result}`}</h1>
+        <div className="score-band">
+          <div className="sb-side us">
+            <Crest className="crest" />
+            <span><span className="sb-team">{team.name}</span>{ours.length ? <span className="sb-goals">{ours.join("; ")}</span> : null}</span>
+          </div>
+          <div className="fulltime" aria-hidden="true">
+            <span className="ft-box">{m.score.us} - {m.score.them}</span>
+            <span className="ft-label">FULL TIME</span>
+          </div>
+          <div className="sb-side them">
+            <span><span className="sb-team">{m.opponent}</span>{theirs.length ? <span className="sb-goals">{theirs.join("; ")}</span> : null}</span>
+            <OppCrest name={m.opponent} className="crest" />
+          </div>
+        </div>
         <p className="meta">{[m.competition, longDate(m.date), m.venue].filter(Boolean).join(", ")}</p>
-        <div className="scoreline">
-          <span className="team">{team.name}</span>
-          <span className="score" aria-label={`${team.name} ${m.score.us}, ${m.opponent} ${m.score.them}`}>
-            <span className={lost ? "lose" : ""}>{m.score.us}</span>
-            <span className="sep">–</span>
-            <span className={won ? "lose" : ""}>{m.score.them}</span>
-          </span>
-          <span className="team them">{m.opponent}</span>
-        </div>
-        <p className="ft">FULL TIME</p>
-        <div className="scorers">
-          <span>{ours.join("; ")}</span>
-          <span className="them">{theirs.join("; ")}</span>
-        </div>
       </div>
     </section>
   );
@@ -54,11 +57,12 @@ export function ResultRow({ m, team }: { m: MatchSummary; team: Site["team"] }) 
   return <li>{m.stats ? <Link className="result" href={`/matches/${m.id}/`}>{inner}</Link> : <div className="result nostats">{inner}</div>}</li>;
 }
 
-// A player's face (their photo from the video), or their shirt when there's no photo.
+// A player's face (their portrait, or their photo from the video), or their shirt when there's no photo. The small round
+// face uses the head-only crop when there is one.
 export function Face({ player, size = "sm" }: { player: Player | undefined; size?: "sm" | "lg" }) {
   if (!player?.photo) return <span className={`face ${size} none`}><Shirt number={player?.number} size={size === "lg" ? "lg" : "sm"} /></span>;
   // eslint-disable-next-line @next/next/no-img-element
-  return <img className={`face ${size}`} src={player.photo} alt="" loading="lazy" />;
+  return <img className={`face ${size}`} src={(size === "sm" && player.face) || player.photo} alt="" loading="lazy" />;
 }
 
 // Leader boards, one box each: the leader up top with their photo, then the chasing pack.
