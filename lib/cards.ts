@@ -19,6 +19,17 @@ export type Card = {
   // false for a player the system can't rate yet (keepers: saves aren't measured): the card shows ?? and no colour
   rated: boolean;
   attrs: Record<Attr, number>;
+  // a goalkeeper card: the six places read as the game's keeper attributes (GK_LABELS) instead of PAC to PHY
+  gkCard?: true;
+  // when the printed position is the site's own label (lib/card-overrides.ts), the position the overall was weighed for
+  ratedAs?: string;
+};
+
+// A keeper's six attributes, in the same six places on the card: diving, handling, kicking, reflexes, speed, positioning
+export const GK_LABELS: Record<Attr, string> = { PAC: "DIV", SHO: "HAN", PAS: "KIC", DRI: "REF", DEF: "SPD", PHY: "POS" };
+export const GK_NOTES: Record<Attr, string> = {
+  PAC: "Diving: not measured yet", SHO: "Handling: not measured yet", PAS: "Kicking: not measured yet",
+  DRI: "Reflexes: not measured yet", DEF: "Speed: not measured yet", PHY: "Positioning: not measured yet",
 };
 
 export const ATTR_NOTES: Record<Attr, string> = {
@@ -37,7 +48,9 @@ const SEEN_FOR_FULL = 8;        // minutes named on camera at which the overall 
 const LOW = 45, HIGH = 90;      // the least and the best in the squad
 
 type Group = "DEF" | "MID" | "WIDE" | "ATT";
-const GROUP: Record<string, Group> = { CB: "DEF", FB: "DEF", CDM: "MID", CM: "MID", LM: "WIDE", RM: "WIDE", AM: "WIDE", ST: "ATT" };
+const GROUP: Record<string, Group> = { CB: "DEF", FB: "DEF", CDM: "MID", CM: "MID", LM: "WIDE", RM: "WIDE", AM: "WIDE", CAM: "WIDE", ST: "ATT" };
+// two positions whose attributes count the same way toward the overall (a card's label can then name either)
+export const weighsLike = (a: string, b: string) => GROUP[a] !== undefined && GROUP[a] === GROUP[b];
 // how much each attribute counts toward the overall, by position group
 const WEIGHTS: Record<Group, Record<Attr, number>> = {
   DEF: { PAC: 0.1, SHO: 0.05, PAS: 0.2, DRI: 0.05, DEF: 0.35, PHY: 0.25 },
