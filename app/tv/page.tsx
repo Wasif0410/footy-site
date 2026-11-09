@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { TvIcon } from "@/components/tv-icon";
 import { TvPlayer, type TvChapter } from "@/components/tv-player";
 import { SectionHead } from "@/components/ui";
 import { playerById } from "@/lib/data";
@@ -22,7 +21,7 @@ function Week({ w, first }: { w: TvWeek; first: boolean }) {
   const len = w.reel ? `${Math.floor(w.reel.length / 60)}:${String(Math.round(w.reel.length % 60)).padStart(2, "0")}` : "";
   return (
     <section className="section">
-      <SectionHead title={w.title} note={`${w.from === w.to ? day(w.from) : `${day(w.from)} to ${day(w.to)}`}. The ${w.top.length} best moments, counting down${len ? `, ${len}` : ""}.`} />
+      <SectionHead title={w.title} note={`${w.from === w.to ? day(w.from) : `${day(w.from)} to ${day(w.to)}`}. The ${w.top.length} best moments, counting down${len ? `, ${len}` : ""}. Only moments we have checked make the cut.`} />
       {w.reel ? <TvPlayer src={w.reel.src} poster={w.reel.poster} chapters={chapters} eager={first} />
         : <p className="muted">The reel is on its way.</p>}
     </section>
@@ -32,15 +31,8 @@ function Week({ w, first }: { w: TvWeek; first: boolean }) {
 export default function Tv() {
   const weeks = tvWeeks();
   return (
-    <main className="wrap page">
-      <section className="section">
-        <h1>Seven XI TV</h1>
-        <p className="lede" style={{ marginTop: "0.6rem" }}>
-          After every match, one short reel of our 10 best moments: goals, shots, tackles and presses that won the ball
-          back. Only moments we have checked make the cut.
-        </p>
-        <div className="tv-hero"><TvIcon size={84} /></div>
-      </section>
+    <main className="wrap page titleless">
+      <h1 className="sr-only">Seven XI TV</h1>
       {weeks.length ? weeks.map((w, i) => <Week key={w.id} w={w} first={i === 0} />)
         : <section className="section"><p className="muted">No reels yet.</p></section>}
     </main>
