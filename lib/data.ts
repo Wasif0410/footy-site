@@ -77,6 +77,7 @@ export type MatchSummary = Pick<Match, "id" | "date" | "venue" | "opponent" | "c
 export type Player = {
   id: number; slug: string; name: string; number: number | null; keeper: boolean; photo: string | null; loan?: string | null;
   position?: string | null;                  // where they usually play
+  face?: string | null;                      // the head alone (from a supplied portrait), for the small round faces
 };
 
 export type Formula = {
