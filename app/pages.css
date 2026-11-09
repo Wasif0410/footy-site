@@ -1,0 +1,13 @@
+/* Pages with no visible title: the heading stays for screen readers (an sr-only h1 that is the first child of
+   <main className="page titleless">), and the first block of content starts a little way under the site nav. */
+.titleless > .sr-only + .section { margin-top: 2rem; }
+@media (max-width: 760px) {
+  .titleless > .sr-only + .section { margin-top: 1.4rem; }
+}
+
+/* Sticky footer: the page is a full-height column, the content takes the spare height, so a short page (Matches,
+   Contact, the 404) puts the footer at the bottom of the screen instead of partway up. A long page is unchanged.
+   The stadium (body::before), the music toast and the phone sheet are position: fixed, so they sit outside this flow;
+   main.wrap keeps its own width and auto side margins, and the header and footer stretch to the full width. */
+body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; }
+body > main { flex: 1 0 auto; }
