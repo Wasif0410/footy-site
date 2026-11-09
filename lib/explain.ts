@@ -8,8 +8,9 @@ import { mmss } from "./format";
 
 const POS_NAME: Record<string, string> = {
   GK: "keeper", CB: "centre-back", FB: "full-back", CDM: "defensive midfielder", CM: "central midfielder",
-  LM: "left midfielder", RM: "right midfielder", AM: "attacking midfielder", ST: "striker",
+  LM: "left midfielder", RM: "right midfielder", AM: "attacking midfielder", CAM: "attacking midfielder", ST: "striker",
 };
+const article = (role: string) => `${/^[aeiou]/i.test(role) ? "an" : "a"} ${role}`;
 const pts = (v: number) => `${v > 0 ? "+" : "−"}${Math.abs(v).toFixed(1)}`;
 const n = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
 const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
@@ -87,7 +88,7 @@ export function whyCard(card: Card, p: SeasonPlayer, name: string, _base: Baseli
   const order = (Object.keys(card.attrs) as Attr[]).sort((a, b) => card.attrs[b] - card.attrs[a]);
   const best = order.slice(0, 2), worst = order.slice(-2).reverse();
   const out = [
-    `Overall ${card.ovr}: half from their average match rating (${p.avgRating?.toFixed(1) ?? "–"} over ${p.ratedMatches} ${p.ratedMatches === 1 ? "game" : "games"}), half from their attributes weighted for a ${POS_NAME[card.pos] ?? card.pos}.`,
+    `Overall ${card.ovr}: half from their average match rating (${p.avgRating?.toFixed(1) ?? "–"} over ${p.ratedMatches} ${p.ratedMatches === 1 ? "game" : "games"}), half from their attributes weighted for ${article(POS_NAME[card.ratedAs ?? card.pos] ?? card.ratedAs ?? card.pos)}.`,
     `Strongest: ${best.map((k) => `${ATTR_NAME[k]} ${card.attrs[k]} (${evidence(k, p)})`).join("; ")}.`,
     `Weakest: ${worst.map((k) => `${ATTR_NAME[k]} ${card.attrs[k]} (${evidence(k, p)})`).join("; ")}.`,
   ];
