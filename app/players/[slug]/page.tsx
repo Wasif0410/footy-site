@@ -3,12 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FutCard } from "@/components/fut-card";
 import { MomentCard } from "@/components/moment-card";
-import { cardFor, teamBaseline } from "@/lib/cards";
+import { PhoneFold } from "@/components/phone-fold";
+import { teamBaseline } from "@/lib/cards";
 import { whyCard } from "@/lib/explain";
 import { ClipCard, Pitch, Rating, SectionHead } from "@/components/ui";
 import { playerBySlug, playerMatches, players, site } from "@/lib/data";
 import { fmt, matchClock, mmss, pct, shortDate, signed, winTag } from "@/lib/format";
 import { seasonPlayers } from "@/lib/season";
+import { keeperCard, mainCard } from "@/lib/squad";
+import "./player-cards.css";
 
 export const dynamicParams = false;
 
@@ -25,7 +28,8 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
   if (!p) notFound();
   const season = seasonPlayers();
   const r = season.find((x) => x.id === p.id);
-  const card = r ? cardFor(r, p.keeper, teamBaseline(season)) : null;
+  const card = mainCard(p, r, teamBaseline(season));
+  const gkCard = keeperCard(p);                       // a few players have a second, goalkeeper card (lib/card-overrides.ts)
   const log = playerMatches(p.id);
   const last = log[0];
   const team = site().team.name;
@@ -38,8 +42,12 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
     <>
       <section className="profile">
         <div className="wrap page">
-          {card ? <FutCard card={card} player={p} link={false} special={log[0]?.match.potm === p.id} />
-            : <div className="photo" style={{ backgroundImage: p.photo ? `url(${p.photo})` : undefined }} role="img" aria-label={p.name} />}
+          {gkCard ? (
+            <div className="profile-cards pair">
+              <FutCard card={card} player={p} link={false} special={log[0]?.match.potm === p.id} />
+              <FutCard card={gkCard} player={p} link={false} />
+            </div>
+          ) : <FutCard card={card} player={p} link={false} special={log[0]?.match.potm === p.id} />}
           <div>
             <span className="no">{p.number ?? ""}</span>
             <h1>{p.name}</h1>
@@ -56,7 +64,7 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
         {card && r ? (
           <section className="section">
             <SectionHead title="Why this card" />
-            <div className="why">{whyCard(card, r, p.name, teamBaseline(season)).map((t, i) => <p key={i}>{t}</p>)}</div>
+            <div className="why"><PhoneFold summary="Read the rest" keep={1}>{[...whyCard(card, r, p.name, teamBaseline(season)), ...(gkCard ? [`${p.name}'s goalkeeper card has no rating: saves aren't measured yet, so the overall and all six attributes show ??.`] : [])].map((t, i) => <p key={i}>{t}</p>)}</PhoneFold></div>
           </section>
         ) : null}
         <section className="section">
