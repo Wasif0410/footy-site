@@ -1,0 +1,400 @@
+/* Ultimate Team: the squad screen, drawn after the football game's. The pitch in perspective with the cards standing
+   on it, Summary in the top left corner, Squad actions in the top right, the subs and reserves peeking up along the
+   bottom. Every class starts with ut-.
+
+   Cards are sized in em, and the em is a share of the pitch area's width (cqw), so the whole screen scales as one and
+   the card positions in lib/ut.ts hold at every size. Three layouts, by the width of the builder (.ut):
+     under 1000px  tall:  actions, then the pitch (4:5), the bench as a strip, then the summary
+     1000-1179px   wide:  the pitch (16:9) with the bench peeking up inside it, the two panels underneath
+     1180px and up full:  as wide, with Summary and Squad actions in the pitch's top corners, as in the game */
+.ut { container: ut / inline-size; position: relative; margin-top: 1.1rem;
+  --link-strong: #3fc27f; --link-ok: #f2b134; --link-none: #ef4b3c; }
+.ut-in { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "act" "stage" "bench" "sum"; gap: 0.75rem; }
+.ut-in > * { min-width: 0; }
+.ut-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* =============================== the pitch area =============================== */
+.ut-stage { container: stage / inline-size; grid-area: stage; position: relative; width: 100%; max-width: 40rem; justify-self: center;
+  aspect-ratio: 4 / 5; overflow: hidden; isolation: isolate; }
+.ut-pitch, .ut-links { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ut-pitch { z-index: 0; }
+.ut-links { z-index: 1; overflow: visible; }
+.ut-w { display: none; }
+.ut-grass-a { fill: #2f7234; }
+.ut-grass-b { fill: #296630; }
+.ut-lines { fill: none; stroke: rgba(255, 255, 255, 0.62); stroke-width: 2px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+
+/* links run between the cards' feet */
+.ut-links line { vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.ut-link-case { stroke: rgba(0, 0, 0, 0.5); stroke-width: 6px; }
+.ut-link { stroke: var(--lc); stroke-width: 3px; transition: stroke 0.25s; }
+.ut-link.ut-link-none { opacity: 0.85; }
+.ut-links line { animation: ut-link-in 0.32s ease-out 0.3s backwards; }
+@keyframes ut-link-in { from { opacity: 0; } }
+
+/* a slot is a card standing on its foot point; the foot is the dot where the links meet, the position is written under it */
+.ut-slot { position: absolute; z-index: 2; left: var(--tx); top: var(--ty); width: 7.04em; height: 8.8em; font-size: 2cqw; transform: translate(-50%, -100%); }
+.ut-slot::after { content: ""; position: absolute; left: 50%; top: 100%; width: 0.55em; height: 0.55em; margin: -0.275em 0 0 -0.275em; border-radius: 50%;
+  background: #f4f6f8; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5); pointer-events: none; }
+.ut-slot.is-empty::after { background: rgba(255, 255, 255, 0.55); }
+.ut-pos { position: absolute; left: 50%; top: calc(100% + 0.5em); transform: translateX(-50%); pointer-events: none; white-space: nowrap;
+  font-family: var(--cond); font-weight: 700; font-size: max(0.8em, 10px); line-height: 1; letter-spacing: 0.1em; color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95), 0 0 6px rgba(0, 0, 0, 0.6); }
+.ut-slot.is-sel .ut-pos { color: var(--yel); }
+.ut-slot:hover, .ut-slot.is-sel, .ut-slot:focus-within { z-index: 20; }
+
+.ut-btn { all: unset; box-sizing: border-box; display: block; position: relative; width: 100%; height: 100%; cursor: pointer; touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent; }
+.ut-btn:focus-visible { outline: none; }
+.ut-card { display: block; width: 100%; height: 100%; pointer-events: none;
+  filter: drop-shadow(0 0.35em 0.4em rgba(0, 0, 0, 0.55)); transition: transform 0.18s var(--ease), filter 0.18s var(--ease); }
+.ut-btn:hover .ut-card { transform: translateY(-0.25em); }
+.ut-btn:focus-visible .ut-card, .is-sel .ut-card {
+  transform: translateY(-0.3em);
+  filter: drop-shadow(0 0 1px var(--yel)) drop-shadow(0 0 0.3em var(--yel)) drop-shadow(0 0 0.8em rgba(246, 211, 60, 0.75)); }
+
+/* a card that has just swapped in: a quick flash and settle where it lands */
+.ut-card.is-landed { animation: ut-land 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); }
+@keyframes ut-land {
+  0% { transform: scale(1.07); filter: drop-shadow(0 0 1px #fff) drop-shadow(0 0 0.45em var(--yel)) drop-shadow(0 0 1em rgba(246, 211, 60, 0.8)); }
+  100% { transform: none; filter: drop-shadow(0 0.35em 0.4em rgba(0, 0, 0, 0.55)); }
+}
+
+/* the cards in flight: copies drawn above everything while the real ones wait to be revealed */
+.ut-flight { position: absolute; inset: 0; z-index: 30; overflow: hidden; pointer-events: none; }
+.ut-ghost { position: absolute; transform-origin: 50% 50%; will-change: transform, opacity;
+  filter: drop-shadow(0 0.9em 0.9em rgba(0, 0, 0, 0.55)) drop-shadow(0 0 0.35em rgba(246, 211, 60, 0.45)); }
+
+/* an empty slot: the card's outline, dashed */
+.ut-empty { display: grid; place-items: center; }
+.ut-empty-shape { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.ut-empty-shape polygon { fill: rgba(0, 0, 0, 0.32); stroke: rgba(255, 255, 255, 0.7); stroke-width: 1.5px; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke;
+  transition: fill 0.15s, stroke 0.15s; }
+.ut-empty:hover .ut-empty-shape polygon, .is-sel .ut-empty-shape polygon { fill: rgba(246, 211, 60, 0.2); stroke: var(--yel); }
+.ut-empty:focus-visible .ut-empty-shape polygon { stroke: var(--yel); stroke-width: 2.5px; }
+.ut-plus { position: relative; font-family: var(--cond); font-weight: 500; font-size: 3em; line-height: 1; color: #fff; margin-top: -0.2em; }
+
+/* =============================== the card ===============================
+   FIFA 15's small card, as on its squad screen (traced from it): 0.8 wide to tall, a low crown in the middle of the top
+   edge, rounded top corners, straight sides and a shallow point at the foot. The overall and position side by side up
+   top in light type, the club crest and the nation (Canada) down the left, a big head and shoulders on the right cut
+   flat above the chemistry style. Saturated metal, lit brightest between the crest and the face, darker to the edges.
+   --c1 / --c2 / --c3 the metal (light, body, edge), --glow the light (r, g, b), --rim the thin bright edge,
+   --ink-f the bench card's type, --ink-p / --ink-sh the pitch card's type and its shade. */
+.ut-c { --c1: #ffe12e; --c2: #efb710; --c3: #b27504; --lens: #6a370b; --glow: 255, 232, 72; --rim: #ffec94; --ink-f: #3a2707;
+  --ink-p: #fff8d0; --ink-sh: rgba(122, 70, 0, 0.62); --gs: 1;
+  position: relative; display: block; isolation: isolate; width: 7.04em; height: 8.8em; overflow: hidden; color: var(--ink-f);
+  clip-path: polygon(50% 0, 53.3% 0.9%, 56.5% 1.8%, 60% 2.6%, 62.5% 3.3%, 91% 3.5%, 92.5% 4.4%, 93.5% 5.5%, 94.5% 7%, 95.7% 8.8%,
+    96.8% 10.5%, 98% 12%, 100% 13.5%, 100% 85%, 99% 86.3%, 97.5% 87.4%, 95% 88.4%, 91% 89.4%, 86% 90.4%, 82.5% 91.2%, 78.5% 92.1%,
+    74% 93.5%, 70% 94.7%, 66% 95.6%, 62.5% 96.6%, 59.5% 97.4%, 56% 98.3%, 52% 99.4%, 50% 100%, 48% 99.4%, 44% 98.3%, 40.5% 97.4%,
+    37.5% 96.6%, 34% 95.6%, 30% 94.7%, 26% 93.5%, 21.5% 92.1%, 17.5% 91.2%, 14% 90.4%, 9% 89.4%, 5% 88.4%, 2.5% 87.4%, 1% 86.3%,
+    0 85%, 0 13.5%, 2% 12%, 3.2% 10.5%, 4.3% 8.8%, 5.5% 7%, 6.5% 5.5%, 7.5% 4.4%, 9% 3.5%, 37.5% 3.3%, 40% 2.6%, 43.5% 1.8%, 46.7% 0.9%);
+  background: linear-gradient(160deg, var(--rim) 0%, var(--c2) 32%, var(--c3) 72%, var(--rim) 100%); }
+/* the card's lens, as in the game: a deeper disc behind the face, set to its right and cut by the card's edge, with light
+   rings round it and a glare on its left (the big card's lens, globals.css .fut::before, at this card's size: centre at
+   85% across and half way down, disc 1.24em, rings at 1.7, 2.2, 2.65 and 3.55em) */
+.ut-c::before { content: ""; position: absolute; inset: 0.12em; z-index: -1; clip-path: inherit; pointer-events: none;
+  background:
+    radial-gradient(ellipse 3.3em 2.8em at 45% 37%, rgba(var(--glow), calc(0.95 * var(--gs))), rgba(var(--glow), calc(0.42 * var(--gs))) 48%, rgba(var(--glow), 0) 100%),
+    radial-gradient(ellipse 0.62em 1.12em at 3.9em 4.3em, rgba(255, 255, 255, calc(0.75 * var(--gs))), rgba(var(--glow), calc(0.5 * var(--gs))) 38%, rgba(var(--glow), 0) 100%),
+    radial-gradient(circle at 5.86em 4.28em, transparent 0 1.66em, rgba(var(--glow), 0.55) 1.68em 1.82em, transparent 1.84em 2.06em,
+      rgba(var(--glow), 0.38) 2.07em 2.33em, transparent 2.35em 2.63em, rgba(var(--glow), 0.28) 2.64em 2.7em, transparent 2.72em 3.5em,
+      rgba(var(--glow), 0.16) 3.52em 3.58em, transparent 3.6em),
+    radial-gradient(circle at 5.86em 4.28em, color-mix(in srgb, var(--c3) 40%, var(--c2)) 0, color-mix(in srgb, var(--c3) 78%, var(--c2)) 1.04em,
+      color-mix(in srgb, var(--c3) 88%, #000) 1.21em, rgba(var(--glow), 0.5) 1.24em, transparent 1.29em),
+    radial-gradient(ellipse 92% 80% at 45% 38%, var(--c1) 0%, var(--c2) 46%, var(--c2) 64%, var(--c3) 112%); }
+/* a sub or reserve is FIFA 15's narrow bench card (about 0.43 wide to tall): the name up the left edge, then overall and
+   position, the crest and the nation, the chemistry style and the six numbers, no face. The same crown, metals and rim. */
+.ut-c-bench { width: 4.3em; height: 10em;
+  clip-path: polygon(0 0.95em, 0.5em 0.4em, calc(50% - 0.85em) 0.36em, calc(50% - 0.5em) 0.27em, calc(50% - 0.22em) 0.12em, 50% 0,
+    calc(50% + 0.22em) 0.12em, calc(50% + 0.5em) 0.27em, calc(50% + 0.85em) 0.36em, calc(100% - 0.5em) 0.4em, 100% 0.95em,
+    100% calc(100% - 0.85em), calc(100% - 0.3em) calc(100% - 0.6em), calc(50% + 0.6em) calc(100% - 0.12em), 50% 100%,
+    calc(50% - 0.6em) calc(100% - 0.12em), 0.3em calc(100% - 0.6em), 0 calc(100% - 0.85em)); }
+.ut-c-bench::before { background:
+    radial-gradient(ellipse 2.6em 2.4em at 62% 30%, rgba(var(--glow), calc(0.9 * var(--gs))), rgba(var(--glow), calc(0.4 * var(--gs))) 48%, rgba(var(--glow), 0) 100%),
+    radial-gradient(ellipse 95% 70% at 50% 34%, var(--c1) 0%, var(--c2) 48%, var(--c2) 66%, var(--c3) 118%); }
+
+.ut-c::after { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: linear-gradient(112deg, transparent 30%, rgba(255, 255, 255, 0.24) 44%, transparent 56%); opacity: 0.55; }
+.ut-c-silver { --c1: #ffffff; --c2: #cdd3da; --c3: #858e98; --lens: #4f555d; --glow: 255, 255, 255; --rim: #ffffff; --ink-f: #1d2125;
+  --ink-p: #20262c; --ink-sh: rgba(255, 255, 255, 0.55); }
+.ut-c-bronze { --c1: #f8c497; --c2: #cd7f47; --c3: #86461d; --lens: #5c2c16; --glow: 255, 208, 160; --rim: #ffdcbd; --ink-f: #2c1409;
+  --ink-p: #fff0e0; --ink-sh: rgba(80, 30, 4, 0.7); }
+.ut-c-motm { --c1: #c4486d; --c2: #8c2346; --c3: #3a0918; --lens: #1f040c; --glow: 255, 214, 150; --rim: #f3d68b; --ink-f: #f6dc95; --gs: 0.7;
+  --ink-p: #f8df9a; --ink-sh: rgba(40, 0, 10, 0.75); }
+.ut-c-none { --c1: #4d5058; --c2: #2f3137; --c3: #1a1b1f; --lens: #0f1013; --glow: 205, 210, 220; --rim: #6a6d75; --ink-f: #b9bcc3; --gs: 0.6;
+  --ink-p: #cfd2d8; --ink-sh: rgba(0, 0, 0, 0.6); }
+.ut-c-none .ut-c-face { filter: grayscale(0.35); }
+
+/* overall and position side by side */
+.ut-c-top { position: absolute; z-index: 2; left: 0.55em; top: 0.5em; display: flex; align-items: center; gap: 0.22em; line-height: 1; font-family: var(--cond); }
+.ut-c-top b { font-weight: 700; font-size: 1.95em; letter-spacing: -0.01em; }
+.ut-c-top i { font-style: normal; font-weight: 800; font-size: max(0.72em, 8px); letter-spacing: 0.04em; }
+/* crest and nation down the left */
+.ut-c-marks { position: absolute; z-index: 2; left: 0.62em; top: 2.6em; width: 1.35em; display: grid; justify-items: center; gap: 0.5em; }
+.ut-c-crest { width: 1.12em; height: 1.32em; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
+.ut-c-nation { width: 1.35em; height: 0.675em; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18); }
+/* the face on the right, under the overall, in front of the lens */
+.ut-c-face { position: absolute; z-index: 1; left: 2.5em; right: 0.2em; top: 1.95em; height: 5.05em; display: grid; place-items: end center;
+  background: center top / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent); mask-image: linear-gradient(180deg, #000 84%, transparent); }
+/* a photo from the video is a rectangle: softened all round so it sits in the card */
+.ut-c-face:not(.is-cut) { left: 2.75em; right: 0.45em;
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 60%, transparent 100%); mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 60%, transparent 100%); }
+.ut-c-anon { width: 82%; height: auto; fill: currentColor; opacity: 0.32; }
+.ut-c-name { position: absolute; z-index: 2; left: 0.45em; right: 0.45em; top: 6.3em; padding-top: 0.32em; text-align: center;
+  border-top: 1px solid color-mix(in srgb, var(--ink-f) 28%, transparent);
+  font-family: var(--cond); font-weight: 800; font-size: max(0.88em, 8.5px); line-height: 1.1; text-transform: uppercase; letter-spacing: 0.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* the pitch card's own layout (a sub keeps the rules above), placed as the game's squad screen places it, in em of the
+   7.04 x 8.8 card: the overall and position in light type at the top left; the crest, then the flag, down the left; the
+   head and shoulders on the right, the head about two fifths of the card's height, cut flat just above the foot; the
+   chemistry style (a kicking player and its code) centred a little right of the middle along the foot. The player's
+   chemistry only shows when the card is pointed at or picked, in the empty top right corner. */
+.ut-c:not(.ut-c-bench) { color: var(--ink-p); }
+.ut-c:not(.ut-c-bench) .ut-c-top { left: 0.62em; top: 0.78em; gap: 0.5em; align-items: baseline;
+  text-shadow: 0 0.035em 0.04em var(--ink-sh), 0 0 0.14em var(--ink-sh); }
+.ut-c:not(.ut-c-bench) .ut-c-top b { font-weight: 600; font-size: 1.5em; letter-spacing: 0.01em; }
+.ut-c:not(.ut-c-bench) .ut-c-top i { font-weight: 600; font-size: max(1.28em, 9px); letter-spacing: 0.02em; }
+.ut-c:not(.ut-c-bench) .ut-c-marks { inset: 0; width: auto; display: block; pointer-events: none; }
+.ut-c:not(.ut-c-bench) .ut-c-crest { position: absolute; left: 1.15em; top: 3.05em; width: 1.36em; height: 1.6em; }
+.ut-c:not(.ut-c-bench) .ut-c-nation { position: absolute; left: 0.82em; top: 5.15em; width: 2.05em; height: 1.025em;
+  box-shadow: 0 0.04em 0.12em rgba(0, 0, 0, 0.35); }
+/* the face box; each measured portrait is framed inline (faceFrame in ultimate-team.tsx) so every head is the same size:
+   hair top at 29% of the card, chin at 72%, the face's middle at 67% across, the cut just under the collar, as in the
+   game. This default frames a typical portrait the same way (drawn 7.4em square). */
+.ut-c:not(.ut-c-bench) .ut-c-face { left: 2.5em; right: 0; top: 1.9em; height: 4.92em; background-size: 7.4em auto; background-position: -1.48em 0.45em;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 0.7em); mask-image: linear-gradient(90deg, transparent, #000 0.7em); }
+.ut-c:not(.ut-c-bench) .ut-c-face:not(.is-cut) { left: 2.65em; right: 0.3em; top: 2em; height: 4.8em; background-size: cover; background-position: center 18%;
+  -webkit-mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%); mask-image: radial-gradient(ellipse closest-side at 50% 50%, #000 62%, transparent 100%); }
+.ut-c:not(.ut-c-bench) .ut-c-style { left: 0; right: 0; top: 7.02em; height: 1.2em; padding-left: 1.06em; justify-content: center; gap: 0.45em;
+  text-shadow: 0 0.035em 0.04em var(--ink-sh), 0 0 0.12em var(--ink-sh); }
+.ut-c:not(.ut-c-bench) .ut-c-sico { width: 1.2em; height: 1.03em; opacity: 1; filter: drop-shadow(0 0.03em 0.05em var(--ink-sh)); }
+.ut-c:not(.ut-c-bench) .ut-c-style > span { font-weight: 600; font-size: max(1.1em, 8px); letter-spacing: 0.05em; }
+/* the chemistry style, base (a sub sets its own place) */
+.ut-c-style { position: absolute; z-index: 2; display: flex; align-items: center; font-family: var(--cond); line-height: 1; white-space: nowrap; }
+.ut-c-sico { width: 0.7em; height: 0.7em; flex: none; opacity: 0.9; }
+.ut-c-style > span { font-weight: 800; letter-spacing: 0.06em; }
+.ut-c-chem { position: absolute; z-index: 4; right: 0.5em; top: 0.95em; min-width: 1.4em; height: 1.4em; padding: 0 0.16em; display: none; place-items: center;
+  font-weight: 800; color: #fff; background: var(--tc); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+  animation: ut-pop 0.25s cubic-bezier(0.2, 1.5, 0.4, 1) backwards; }
+.ut-c-chem.ut-mid { color: #2a1c02; }
+.ut-c-chem.ut-mid > span { text-shadow: none; }
+.ut-c-chem > span { font-size: max(0.9em, 8px); line-height: 1; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5); }   /* the square is placed in card units; only the number is smaller */
+.ut-btn:hover .ut-c-chem, .ut-btn:focus-visible .ut-c-chem, .ut-slot.is-sel .ut-c-chem { display: grid; }
+@keyframes ut-pop { from { opacity: 0; scale: 1.6; } }
+
+/* a sub or reserve: the name runs up the left edge in a strip of its own (reading bottom to top, so it shows in the peek),
+   the rest centred in the right part; no face. Light type with a soft shade, as on the game's bench (dark on silver) */
+.ut-c-bench { color: var(--ink-p); text-shadow: 0 0.035em 0.04em var(--ink-sh), 0 0 0.12em var(--ink-sh); }
+.ut-c-bench .ut-c-sico { filter: drop-shadow(0 0.03em 0.05em var(--ink-sh)); }
+.ut-c-bench .ut-c-name { top: 0.9em; bottom: 1.3em; left: 0; right: auto; width: 1.45em; padding: 0; border: 0; display: flex; align-items: center;
+  writing-mode: vertical-rl; transform: rotate(180deg); justify-content: flex-end; text-align: end; font-size: max(1em, 8.5px); letter-spacing: 0.08em; line-height: 1; }
+.ut-c-bench .ut-c-top { left: 1.5em; right: 0.2em; top: 0.62em; gap: 0.14em; justify-content: center; align-items: baseline; }
+.ut-c-bench .ut-c-top b { font-weight: 700; font-size: 1.42em; letter-spacing: 0; }
+.ut-c-bench .ut-c-top i { font-weight: 800; font-size: 0.72em; padding: 0; border: 0; letter-spacing: 0; }
+.ut-c-bench .ut-c-marks { left: 1.5em; right: 0.2em; top: 2.15em; width: auto; gap: 0.36em; }
+.ut-c-bench .ut-c-crest { width: 1.4em; height: 1.65em; }
+.ut-c-bench .ut-c-nation { width: 1.66em; height: 0.83em; box-shadow: 0 0.03em 0.1em rgba(0, 0, 0, 0.3); }
+.ut-c-bench .ut-c-style { left: 1.5em; right: 0.2em; top: 5.38em; height: 0.9em; justify-content: center; gap: 0.3em; }
+.ut-c-bench .ut-c-sico { width: 0.78em; height: 0.67em; }
+.ut-c-bench .ut-c-style > span { font-size: 0.85em; letter-spacing: 0.05em; }
+
+/* the six numbers, two columns of three, no names: PAC SHO PAS down the left, DRI DEF PHY down the right */
+.ut-c-attrs { position: absolute; z-index: 2; left: 1.55em; right: 0.15em; top: 6.38em; display: grid; grid-template-columns: 1fr 1fr; column-gap: 0.1em; grid-template-rows: repeat(3, 1.04em);
+  grid-auto-flow: column; justify-items: center; align-items: center; font-family: var(--cond); line-height: 1; }
+.ut-c-attrs b { font-weight: 800; font-size: 0.9em; }
+
+/* =============================== panels =============================== */
+.ut-panel { background: var(--panel-bg); border: 1px solid var(--panel-line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07); min-width: 0; }
+.ut-sum { grid-area: sum; }
+.ut-act { grid-area: act; }
+.ut-h { position: relative; display: flex; align-items: center; gap: 0.6rem; margin: 0; padding: 0.6rem 0.9rem 0.6rem 1.05rem;
+  font-family: var(--cond); font-weight: 600; font-size: 1.1rem; line-height: 1; text-transform: uppercase; letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid var(--panel-line); }
+.ut-h::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--yel); }
+.ut-body { padding: 0.8rem 0.9rem 0.9rem; display: grid; gap: 0.75rem; }
+.ut-lab { font-family: var(--cond); font-weight: 600; font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.ut-help { margin: 0; font-size: 0.82rem; line-height: 1.45; color: var(--ink-2); }
+.ut-help b { color: var(--yel); font-weight: 700; }
+
+/* formation picker */
+.ut-form { display: grid; gap: 0.3rem; }
+.ut-form-wide { display: none; }
+.ut-select { appearance: none; width: 100%; min-height: 2.6rem; padding: 0 2.2rem 0 0.8rem; border: 1px solid var(--panel-line); border-radius: 0; cursor: pointer;
+  font-family: var(--cond); font-weight: 600; font-size: 1.2rem; letter-spacing: 0.05em; color: var(--ink);
+  background: rgba(0, 0, 0, 0.45) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23f6d33c' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 0.8rem center; }
+.ut-select:hover { border-color: var(--yel); }
+.ut-select:focus-visible { outline: 2px solid var(--yel); outline-offset: 2px; }
+.ut-select option { background: #14161b; color: #fff; }
+
+/* the picked player */
+.ut-who { display: grid; gap: 0.65rem; }
+.ut-who-head { display: flex; align-items: center; gap: 0.75rem; }
+.ut-who-id { min-width: 0; }
+.ut-ovr { flex: none; display: grid; place-items: center; min-width: 3.1rem; height: 3.1rem; padding: 0 0.3rem; font-family: var(--cond); font-weight: 800; font-size: 1.95rem; line-height: 1;
+  color: #2c2108; background: linear-gradient(155deg, #f7e9b0, #e2c46b 55%, #b98f2e); }
+.ut-tier-silver { color: #1d232a; background: linear-gradient(155deg, #f3f5f8, #c9ced6 55%, #8f99a6); }
+.ut-tier-bronze { color: #2a1608; background: linear-gradient(155deg, #f1d3b3, #c98d5e 55%, #8d5a33); }
+.ut-tier-none { color: #8e9198; background: #25272c; }
+.ut-name { font-family: var(--cond); font-weight: 700; font-size: 1.45rem; line-height: 1; text-transform: uppercase; letter-spacing: 0.02em; overflow-wrap: anywhere; }
+.ut-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; margin-top: 0.3rem; }
+.ut-tag { font-family: var(--cond); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.06em; padding: 0.08rem 0.42rem; border: 1px solid var(--line-strong); color: var(--ink); }
+.ut-tag-loan { color: var(--on-yel); background: var(--yel-fill); border-color: transparent; }
+.ut-meta-note { font-size: 0.74rem; color: var(--ink-3); }
+/* the six numbers as the game lists them: number, then the short name */
+.ut-attrs { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0.45rem 1rem; }
+.ut-attrs > div { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 0.2rem 0.45rem; cursor: help; }
+.ut-attrs dd { margin: 0; font-family: var(--cond); font-weight: 800; font-size: 1.2rem; line-height: 1; min-width: 1.5rem; text-align: right; }
+.ut-attrs dt { font-family: var(--cond); font-weight: 600; font-size: 0.84rem; letter-spacing: 0.08em; color: var(--ink-2); }
+.ut-attrs .ut-meter { grid-column: 1 / -1; }
+.ut-row { display: flex; align-items: baseline; justify-content: space-between; gap: 0.6rem; }
+.ut-fit { font-size: 0.86rem; font-weight: 700; }
+.ut-fit-2 { color: var(--up); } .ut-fit-1 { color: var(--link-ok); } .ut-fit-0 { color: var(--down); }
+.ut-style-name { font-size: 0.86rem; font-weight: 700; color: var(--ink); }
+.ut-num { font-family: var(--cond); font-weight: 800; font-size: 1.45rem; line-height: 1; }
+.ut-num small, .ut-big small { font-size: 0.55em; font-weight: 600; color: var(--ink-3); margin-left: 0.1em; }
+.ut-sub-h { margin-top: 0.15rem; font-family: var(--cond); font-weight: 600; font-size: 0.92rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-2);
+  padding-top: 0.6rem; border-top: 1px solid var(--line); }
+.ut-linklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.4rem; }
+.ut-linklist li { display: flex; align-items: baseline; gap: 0.5rem; font-size: 0.84rem; line-height: 1.35; color: var(--ink-2); }
+.ut-linklist b { color: var(--ink); font-weight: 700; }
+.ut-dot { flex: none; display: inline-block; width: 0.7rem; height: 0.7rem; margin-right: 0.45rem; background: var(--lc); }
+.ut-linklist .ut-dot { margin-right: 0; }
+
+/* colours: links, tones */
+.ut-link-strong { --lc: var(--link-strong); } .ut-link-ok { --lc: var(--link-ok); } .ut-link-none { --lc: var(--link-none); }
+.ut-hi { --tc: var(--up); } .ut-mid { --tc: var(--link-ok); } .ut-lo { --tc: var(--down); }
+.ut-num.ut-hi, .ut-num.ut-mid, .ut-num.ut-lo, .ut-big { color: var(--tc, var(--ink)); }
+
+/* bars */
+.ut-meter { display: block; height: 6px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+.ut-meter i { display: block; height: 100%; background: var(--tc, var(--yel)); transition: width 0.35s var(--ease); }
+.ut-meter-sm { height: 4px; }
+
+/* squad actions: rating with its stars, chemistry with its bar, as the game lays them out */
+.ut-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem 1rem; }
+.ut-stat { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "lab" "big" "sub"; align-items: center; gap: 0.25rem; }
+.ut-stat .ut-lab { grid-area: lab; align-self: end; }
+.ut-stat .ut-stars, .ut-stat .ut-meter { grid-area: sub; align-self: start; }
+.ut-stat .ut-meter { margin-top: 0.3rem; }
+.ut-big { grid-area: big; font-family: var(--cond); font-weight: 800; font-size: 2.5rem; line-height: 0.95; }
+.ut-stars { position: relative; display: inline-block; font-size: 1.15rem; line-height: 1.1; letter-spacing: 0.06em; justify-self: start; white-space: nowrap; }
+.ut-stars-bg { color: rgba(255, 255, 255, 0.18); }
+.ut-stars-fg { position: absolute; left: 0; top: 0; overflow: hidden; white-space: nowrap; color: var(--yel); transition: width 0.35s var(--ease); }
+.ut-actions { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+.ut-act-btn { flex: 1 1 5.5rem; min-height: 2.6rem; padding: 0 0.9rem; border: 1px solid var(--line-strong); border-radius: 0; cursor: pointer; touch-action: manipulation;
+  font-family: var(--cond); font-weight: 700; font-size: 1rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); background: rgba(0, 0, 0, 0.35);
+  transition: background-color 0.12s, border-color 0.12s, color 0.12s, transform 0.06s ease-out, filter 0.12s; }
+.ut-act-btn:hover { border-color: var(--yel); color: var(--yel); }
+.ut-act-btn:focus-visible { outline: 2px solid var(--yel); outline-offset: 2px; }
+.ut-primary { color: var(--on-yel); background: var(--yel-fill); border-color: #ffe97a; }
+.ut-primary:hover { color: var(--on-yel); box-shadow: 0 0 18px rgba(246, 211, 60, 0.35); }
+.ut-key { list-style: none; margin: 0; padding: 0.65rem 0 0; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(auto-fit, minmax(8.5rem, auto));
+  gap: 0.3rem 1.1rem; font-size: 0.78rem; color: var(--ink-2); }
+.ut-key li { display: flex; align-items: center; }
+.ut-act .ut-body { grid-template-columns: minmax(0, 1fr); }
+
+/* =============================== subs and reserves =============================== */
+.ut-bench { grid-area: bench; position: relative; font-size: 0.78rem; }
+.ut-band { position: absolute; inset: 0; background: var(--panel-bg); border: 1px solid var(--panel-line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transition: background-color 0.15s, box-shadow 0.15s; }
+.ut-strip { position: relative; display: flex; align-items: flex-end; min-height: 13.6em; padding: 1.4em 1.6em 1.2em 1.2em; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity; scrollbar-width: thin; scrollbar-color: var(--yel) rgba(255, 255, 255, 0.1); }
+.ut-allon { align-self: center; font-size: 0.85rem; padding: 0.5rem 0; }
+.ut-tab { flex: none; align-self: flex-end; height: 10em; display: grid; place-items: center; width: 1.7em; margin-right: 0.5em; padding: 0.5em 0;
+  writing-mode: vertical-rl; transform: rotate(180deg); font-family: var(--cond); font-weight: 700; font-size: 1.1em; letter-spacing: 0.16em;
+  text-transform: uppercase; color: #d9dbe0; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.14); }
+.ut-sub + .ut-tab { margin-left: 0.6em; }
+.ut-sub { position: relative; flex: none; width: 4.3em; height: 10em; scroll-snap-align: start; transition: transform 0.24s var(--ease), width 0.2s var(--ease); }
+.ut-sub + .ut-sub { margin-left: 0.14em; }
+/* the open one: the big card drawn small (18.8em tall at 0.585 of the bench's size: 7.37 x 11em), a little taller than
+   the narrow cards, reaching up above them; it grows out of the narrow card */
+.ut-sub .fut { display: none; }
+.ut-sub.is-x { width: 7.4em; z-index: 7; }
+.ut-sub.is-x .ut-c-bench { display: none; }
+.ut-sub.is-x .fut { display: block; position: absolute; left: 50%; bottom: -0.3em; font-size: 0.585em; translate: -50% 0; transform-origin: 50% 100%;
+  animation: ut-open 0.22s cubic-bezier(0.2, 0.9, 0.3, 1.12) both; }
+@keyframes ut-open { from { opacity: 0.35; scale: 0.58 0.91; } }
+/* the game's cursor: white corner marks just outside the open card */
+.ut-sub.is-x::after { content: ""; position: absolute; z-index: 2; left: -0.28em; right: -0.28em; top: -1em; bottom: -0.58em; pointer-events: none;
+  --m: 0.95em; --t: 0.16em;
+  background:
+    linear-gradient(#fff, #fff) 0 0 / var(--m) var(--t), linear-gradient(#fff, #fff) 0 0 / var(--t) var(--m),
+    linear-gradient(#fff, #fff) 100% 0 / var(--m) var(--t), linear-gradient(#fff, #fff) 100% 0 / var(--t) var(--m),
+    linear-gradient(#fff, #fff) 0 100% / var(--m) var(--t), linear-gradient(#fff, #fff) 0 100% / var(--t) var(--m),
+    linear-gradient(#fff, #fff) 100% 100% / var(--m) var(--t), linear-gradient(#fff, #fff) 100% 100% / var(--t) var(--m);
+  background-repeat: no-repeat; filter: drop-shadow(0 0 0.12em rgba(0, 0, 0, 0.7)); animation: ut-marks 0.22s var(--ease) both; }
+@keyframes ut-marks { from { opacity: 0; transform: scale(1.08); } }
+.ut-ghost > .fut { font-size: inherit; }
+.ut-sub:hover, .ut-sub:focus-within, .ut-sub.is-sel { z-index: 5; }
+/* on loan, or already on the pitch by his other card ("In XI"): a tag just under the card's point, clear of its numbers */
+.ut-loan { position: absolute; z-index: 4; left: 50%; bottom: -1.3em; transform: translateX(-50%); padding: 0.1em 0.35em; pointer-events: none;
+  font-family: var(--cond); font-weight: 800; font-size: 0.75em; line-height: 1.1; letter-spacing: 0.06em; text-transform: uppercase; color: var(--on-yel); background: var(--yel-fill); }
+
+.ut-xi { color: #f1f2f5; background: #4a4f5a; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3); }
+/* a player's other card, while the first is on the pitch: dimmed, brighter when pointed at or picked (it can still be picked, to swap the two) */
+.ut-sub.is-twin .ut-c-bench { opacity: 0.5; transition: opacity 0.15s; }
+.ut-sub.is-twin:is(:hover, :focus-within, .is-sel) .ut-c-bench { opacity: 0.85; }
+.ut-help .ut-warn { color: var(--down); }
+.ut-linklist .ut-keeper { color: var(--link-ok); }
+
+/* =============================== wide and full layouts =============================== */
+@container ut (min-width: 1000px) {
+  .ut-in { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-areas: "stage stage" "sum act"; gap: 0.75rem; }
+  .ut-stage { max-width: none; aspect-ratio: 16 / 9; }
+  .ut-t { display: none; }
+  .ut-w { display: block; }
+  .ut-slot { left: var(--x); top: var(--y); font-size: 1.1cqw; }
+  .ut-stat { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "lab big" "sub big"; gap: 0.15rem 0.6rem; }
+  .ut-form-wide { display: grid; }
+  .ut-form-narrow { display: none; }
+
+  /* the bench lies along the bottom of the pitch; the cards peek up from it and rise when pointed at or picked */
+  .ut-bench { grid-area: stage; align-self: end; z-index: 4; height: 10.5em; font-size: 1.1cqw; pointer-events: none; }
+  .ut-band { inset: auto 0 0 0; height: 6.5em; pointer-events: auto; border: 0; border-top: 1px solid rgba(255, 255, 255, 0.2);
+    background: linear-gradient(180deg, rgba(10, 12, 17, 0.72), rgba(5, 6, 9, 0.92)); box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.35); }
+  .ut-strip { height: 100%; min-height: 0; padding: 0 2em 0 1.2em; justify-content: safe center; pointer-events: none; overflow-y: hidden; scrollbar-width: none; }
+  .ut-strip::-webkit-scrollbar { display: none; }
+  .ut-tab { align-self: flex-end; height: 6.5em; margin-right: 0.5em; padding: 0; background: rgba(255, 255, 255, 0.08); border-width: 0 1px; }
+  /* down, the bench shows only the tops of the narrow cards: an open card stays narrow until the bench comes up */
+  .ut-bench:not(.is-open) .ut-sub.is-x { width: 4.3em; }
+  .ut-bench:not(.is-open) .ut-sub.is-x .fut, .ut-bench:not(.is-open) .ut-sub.is-x::after { display: none; }
+  .ut-bench:not(.is-open) .ut-sub.is-x .ut-c-bench { display: block; }
+  .ut-sub { pointer-events: auto; transform: translateY(3.75em); }
+  .ut-sub:hover, .ut-sub:focus-within, .ut-sub.is-sel { transform: translateY(0.1em); }
+  .ut-allon { pointer-events: auto; align-self: flex-end; margin: 0 0 2.4em; font-size: max(1em, 0.85rem); }
+
+  /* in use, the strip pops up: bigger, the whole of every card with its numbers, the card in focus larger still */
+  .ut-bench { transition: font-size 0.24s var(--ease), height 0.24s var(--ease); }
+  .ut-band { transition: height 0.24s var(--ease), background-color 0.2s; }
+  .ut-strip { transition: padding 0.24s var(--ease); }
+  .ut-sub { transition: transform 0.24s var(--ease), width 0.2s var(--ease); }
+  .ut-bench.is-open { z-index: 6; font-size: 1.45cqw; height: 14.2em; }   /* up, the bench stands over the panels' feet too */
+  /* up, the cards stand over the foot of the pitch as in the game: only a soft shade under them, darkest at the bottom */
+  .ut-bench.is-open .ut-band { height: 14.2em; border-top-color: transparent; box-shadow: none;
+    background: linear-gradient(180deg, rgba(4, 6, 9, 0) 0%, rgba(4, 6, 9, 0.45) 24%, rgba(4, 6, 9, 0.8) 100%) border-box; }   /* drawn from the border edge: no repeat of its darkest row under the clear top border */
+  .ut-bench.is-open .ut-strip { padding-bottom: 1.1em; }
+  .ut-bench.is-open .ut-sub { transform: none; transition-delay: calc(var(--i, 0) * 16ms), 0s; }   /* the cards come up one after another */
+  .ut-bench.is-open .ut-tab { height: 10em; }
+  .ut-bench.is-open .ut-sub:is(:hover, :focus-within, .is-sel) { z-index: 6; }
+  .ut-bench.is-open .ut-sub.is-x { z-index: 8; }
+}
+@container ut (min-width: 1180px) {
+  .ut-in { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage"; }
+  .ut-sum, .ut-act { grid-area: stage; align-self: start; z-index: 5; width: clamp(12.5rem, 17cqw, 15.5rem);
+    background: rgba(12, 14, 19, 0.84); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .ut-sum { justify-self: start; }
+  .ut-act { justify-self: end; }
+  .ut-stats { grid-template-columns: minmax(0, 1fr); }
+  .ut-key { grid-template-columns: minmax(0, 1fr); }
+  .ut-actions .ut-primary { flex-basis: 100%; }
+}
+
+@media (pointer: coarse) {
+  .ut-act-btn, .ut-select { min-height: 2.9rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ut *, .ut *::before, .ut *::after { transition: none !important; animation: none !important; }
+  .ut-btn:hover .ut-card { transform: none; }
+}
