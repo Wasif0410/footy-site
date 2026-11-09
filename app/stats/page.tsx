@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { SortTable, type Column, type Row } from "@/components/sort-table";
 import { Rating, SectionHead, Who } from "@/components/ui";
 import { playerById } from "@/lib/data";
@@ -49,13 +48,8 @@ export default function Stats() {
     },
   }));
   return (
-    <main className="wrap page">
-      <section className="section">
-        <h1>Season stats</h1>
-        <p className="lede" style={{ marginTop: "0.6rem" }}>
-          Every player&apos;s season in one table. For who leads on each measure, see the <Link className="more" href="/leaderboards/">leaderboards</Link>.
-        </p>
-      </section>
+    <main className="wrap page titleless">
+      <h1 className="sr-only">Season stats</h1>
       <section className="section">
         <SectionHead title="Every player" note="Click any heading to sort by it." />
         <SortTable columns={COLUMNS} rows={rows} initial="rating"
