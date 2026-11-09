@@ -31,6 +31,7 @@ const LINKS = [
   { href: "/", label: "Home" },
   { href: "/matches/", label: "Matches" },
   { href: "/players/", label: "Players" },
+  { href: "/ultimate-team/", label: "Ultimate Team" },
   { href: "/leaderboards/", label: "Leaderboards" },
   { href: "/stats/", label: "Stats" },
   { href: "/tv/", label: "TV" },
