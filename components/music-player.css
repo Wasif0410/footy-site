@@ -1,0 +1,61 @@
+/* Music player: the speaker button in the header and the "Now playing" banner (MATCHDAY look: sharp corners,
+   condensed uppercase type, one bright yellow). */
+
+.mp-btn {
+  width: 2.8rem; padding: 0; display: grid; place-items: center; flex: none; cursor: pointer;
+  background: var(--panel-bg); border: 1px solid var(--panel-line); border-radius: 0; color: var(--yel);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+}
+.mp-btn svg { display: block; overflow: visible; }
+.mp-cone { fill: currentColor; }
+.mp-wave, .mp-x { fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; }
+.mp-x { stroke: var(--ink-3, #8f939c); }
+.mp-btn:hover { background: var(--yel); border-color: var(--yel); color: var(--on-yel); }
+.mp-btn:hover .mp-x { stroke: var(--on-yel); }
+.mp-btn:focus-visible { outline: 3px solid var(--yel); outline-offset: 2px; }
+.mp-btn[aria-pressed="true"] { color: var(--ink-2, #c9ccd3); }
+.mp-btn[aria-pressed="true"]:hover { color: var(--on-yel); }
+.mp-btn.is-playing .mp-w1 { animation: mp-pulse 1.1s ease-in-out infinite; }
+.mp-btn.is-playing .mp-w2 { animation: mp-pulse 1.1s ease-in-out 0.25s infinite; }
+@keyframes mp-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+/* the banner: a slanted yellow strip that drops in from the right under the header, like "objective completed" */
+.mp-toast-wrap { position: fixed; right: 0; z-index: 60; pointer-events: none; display: flex; justify-content: flex-end; max-width: 100vw; overflow: hidden; padding: 0 0 0.6rem 1rem; }
+.mp-toast {
+  display: flex; align-items: stretch; margin-right: 1.4rem; transform-origin: right center;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55));
+  animation: mp-slide 4200ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.mp-toast-tab, .mp-toast-body { transform: skewX(-12deg); }
+.mp-toast-tab { display: grid; place-items: center; width: 2.9rem; background: #0b0d12; color: var(--yel); border-left: 3px solid var(--yel); }
+.mp-toast-tab svg { transform: skewX(12deg); }
+.mp-toast-body {
+  display: grid; align-content: center; gap: 0.05rem; padding: 0.42rem 2rem 0.46rem 1.1rem; min-width: 12rem;
+  background: linear-gradient(180deg, var(--yel-hi, #fff38a) 0%, var(--yel) 38%, var(--yel-lo, #dea514) 100%); color: var(--on-yel);
+}
+.mp-toast-body > * { display: block; transform: skewX(12deg); }
+.mp-toast-body small { font: 700 0.7rem/1.1 var(--cond); letter-spacing: 0.16em; text-transform: uppercase; color: var(--on-yel-2, #3a3216); }
+.mp-toast-body strong { font: 800 1.45rem/1.05 var(--cond); letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap; }
+.mp-toast-body em { font: 700 0.82rem/1.1 var(--cond); font-style: normal; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; color: var(--on-yel-2, #3a3216); }
+@keyframes mp-slide {
+  0% { transform: translateX(115%); opacity: 0; }
+  9% { transform: translateX(-1.2rem); opacity: 1; }
+  13% { transform: translateX(0); opacity: 1; }
+  88% { transform: translateX(0); opacity: 1; }
+  100% { transform: translateX(115%); opacity: 0; }
+}
+@keyframes mp-fade { 0% { opacity: 0; } 8% { opacity: 1; } 88% { opacity: 1; } 100% { opacity: 0; } }
+
+@media (max-width: 640px) {
+  .mp-btn { width: 2.6rem; height: 2.9rem; }
+  .mp-toast { margin-right: 0.6rem; }
+  .mp-toast-tab { width: 2.4rem; }
+  .mp-toast-body { min-width: 0; padding-right: 1.4rem; }
+  .mp-toast-body strong { font-size: 1.2rem; }
+  .mp-toast-body em { font-size: 0.74rem; letter-spacing: 0.08em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mp-toast { animation-name: mp-fade; }
+  .mp-btn.is-playing .mp-wave { animation: none; }
+}
