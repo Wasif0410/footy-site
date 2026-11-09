@@ -1,0 +1,18 @@
+/* A player with two cards (the main card and a goalkeeper card) shows both side by side in the profile band, the main
+   card first. A player with one card is not touched: none of this applies without the .pair wrapper. */
+.profile-cards { display: flex; align-items: flex-end; gap: 1.6rem; }
+
+/* narrower than a wide desktop: the two cards keep their place on the left, the name and the season rating stack
+   in the column beside them (the third grid column would leave the name too little room) */
+@media (max-width: 1100px) and (min-width: 641px) {
+  .profile .wrap:has(.profile-cards.pair) { grid-template-columns: auto minmax(0, 1fr); }
+  .profile .wrap:has(.profile-cards.pair) > .profile-cards { grid-row: 1 / span 2; }
+  .profile .wrap:has(.profile-cards.pair) > .rate { grid-column: 2; justify-items: start; text-align: left; }
+}
+
+/* a phone: one column; the two cards sit side by side, drawn smaller so both fit the width (the cards are all in em, so
+   they keep their proportions): half the width less the gutters and the gap, over the card's 12.6em */
+@media (max-width: 640px) {
+  .profile-cards.pair { justify-self: center; gap: 0.6rem; }
+  .profile .profile-cards.pair .fut { font-size: min(1rem, calc((100vw - 3.2rem) / 25.6)); }
+}
