@@ -47,12 +47,28 @@
         "us": 4,
         "them": 2
       }
+    },
+    "nov06": {
+      "opponent": "Unc FC",
+      "competition": "Rec League",
+      "venue": "The Dome",
+      "video": {
+        "youtube": "3PltcPaM7FE",
+        "offset": 0,
+        "local": "http://localhost:8766/api/matches/nov06/video"
+      },
+      "score": {
+        "us": 4,
+        "them": 1
+      }
     }
   },
   "exclude_matches": [
     "sample",
     "test5",
-    "oct30test"
+    "oct30test",
+    "nov06test",
+    "nov06s"
   ],
   "photos": true,
   "clips": true,
