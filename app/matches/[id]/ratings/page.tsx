@@ -18,7 +18,7 @@ export default async function Ratings({ params }: { params: Promise<{ id: string
           note={f ? (f.compare === "fair7"
             ? `Each game stands alone. Everyone starts from ${f.baseline.toFixed(1)} and is judged on their points against what's expected for the minutes they played: `
               + `the team's own rate for a fair share of ${mmss((f.fair_share_min ?? 0) * 60)}, and ${f.over_share ?? 1.5}× as much for every minute past it. `
-              + `Goals count by position (Fantasy Premier League's 6 / 5 / 4), and everyone on the pitch gets ${f.team_goal_for ?? 0.5} when we score and ${f.team_goal_against ?? -0.5} when they do.`
+              + `Goals count by position (Fantasy Premier League's 6 / 5 / 4), and everyone on the pitch gets +${f.team_goal_for ?? 0.5} when we score and −${Math.abs(f.team_goal_against ?? -0.5)} when they do.`
             : f.compare === "fixed"
             ? `Every action is worth points: good ones add, mistakes take away. Everyone starts from ${f.baseline.toFixed(1)}, and a teammate's goals don't pull anyone down.`
             : `Every action is worth points: good ones add, mistakes take away. Each player's points are compared with what the team's average player makes in the same time, and a player who keeps up the average gets ${f.baseline.toFixed(1)}.`) : undefined}
