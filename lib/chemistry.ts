@@ -56,6 +56,7 @@ function build(ms: Match[]) {
       for (const line of mp.breakdown) {
         if (!PASS_LINES.has(line.key)) continue;
         for (const mo of line.moments) {
+          if (mo.t === null) continue;
           const mt = /^(?:Forward to|To) (.+)$/.exec(mo.text);
           const to = mt ? nameToId.get(mt[1]) : undefined;
           if (to === undefined || to === mp.id) continue;

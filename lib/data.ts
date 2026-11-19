@@ -8,7 +8,7 @@ const DATA = path.join(process.cwd(), "data");
 export type Side = 0 | 1;
 export type Who = { id: number | null; name: string; team: Side | null };
 export type Clip = { src: string; poster: string; start: number };
-export type Proof = { t: number; text: string };
+export type Proof = { t: number | null; text: string; off_video?: boolean };   // off_video: a goal the video never showed (no time)
 export type Screen = { label: string; start: number; end: number; file: string };
 export type Video = { youtube: string | null; src: string | null; local: string | null; offset: number | null };
 export type Kind = "pass" | "pass_intercepted" | "tackle" | "ball_out" | "shot" | "goal";
@@ -63,6 +63,7 @@ export type Match = {
   pitch: [number, number];
   periods: [number, number][]; frame: [number, number]; video: Video; screens: Screen[];
   lineup: { id: number; keeper: boolean; spans: [number, number][] }[];
+  rating_formula?: Formula | null;   // how this match was rated (the 7v7 rule from 13 Nov); else the site-wide rule
   // checked: our moments checked by hand; claude: decided by Claude from the video
   review: { events: number; checked: number; claude?: number; waiting: number; goals: number; goals_checked: number;
     players_checked?: number };   // players_checked: followed moment by moment through the video by Claude
@@ -82,11 +83,14 @@ export type Player = {
 
 export type Formula = {
   baseline: number; spread: number; scale: number; per: number; min_minutes: number; judge_on: string;
-  compare?: "team" | "fixed";
+  compare?: "team" | "fixed" | "fair7";   // fair7: the 7v7 rule (each game alone, against the minutes played)
   roles?: Record<string, string>; role_weights?: Record<string, Record<string, number>>;   // position groups and their section weights               // fixed: everyone from the same baseline, points on their own
   min_named_minutes: number; team_per_hour: number; sections: string[];
   sure?: { checked: number; claude: number; auto: number; pending: number };
-  actions: { key: string; label: string; section: string; each: number }[];
+  actions: { key: string; label: string; section: string; each: number | null }[];
+  // the 7v7 rule: the fair share of minutes, how much more a minute past it is expected to bring, and the team lines
+  fair_share_min?: number; over_share?: number; team_goal_for?: number; team_goal_against?: number;
+  clean_spell?: Record<string, number>; goal?: Record<string, number>;
 };
 
 export type Site = {

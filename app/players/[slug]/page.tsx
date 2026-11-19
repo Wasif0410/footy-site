@@ -117,11 +117,15 @@ export default async function PlayerPage({ params }: { params: Promise<{ slug: s
                       </summary>
                       <ol>
                         {b.moments.map((mo, i) => (
+                          mo.t === null ? (
+                            <li key={i}><span className="when">—<small>not on video</small></span><span>{mo.text}</span><span /></li>
+                          ) : (
                           <li key={i}>
                             <span className="when">{matchClock(mo.t, last.match.periods)}<small>video {mmss(mo.t)}</small></span>
                             <span>{mo.text}</span>
                             <Link href={`/matches/${last.match.id}/review/?t=${mo.t}`}>Watch</Link>
                           </li>
+                          )
                         ))}
                       </ol>
                     </details>

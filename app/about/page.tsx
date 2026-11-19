@@ -20,6 +20,7 @@ export default function About() {
   const followedIn = ms.filter((m) => m.review.players_checked), followed = followedIn.reduce((a, m) => a + (m.review.players_checked ?? 0), 0);
   const src = chemistrySources(ms);
   const reelSize = tvWeeks()[0]?.top.length;
+  const f7 = ms.find((m) => m.rating_formula?.compare === "fair7")?.rating_formula ?? null;   // the 7v7 rule, newest match first
 
   const overview = (
     <>
@@ -63,6 +64,27 @@ export default function About() {
           {" "}± beside a rating shows how far it could move once they&apos;re checked.
         </p>
       ) : null}
+      {f7 ? (
+        <>
+          <h3>From 13 November 2026: the 7v7 rule</h3>
+          <p>
+            Newer matches are rated by a rule made for our 7v7 games with rolling subs. Older matches keep the rule below.
+          </p>
+          <ul>
+            <li>Each game stands alone: everyone starts from {f7.baseline.toFixed(1)} and is judged on their points against what&apos;s
+              expected for the minutes they played in that game, at the team&apos;s own rate (goals and assists left out).</li>
+            <li>The fair share is the outfield minutes split between the outfield players. Every minute past it is expected to bring
+              {" "}{f7.over_share ?? 1.5}× as much, so staying on only pays off if you make a difference. Playing less isn&apos;t punished.</li>
+            <li>Goals count by position, from Fantasy Premier League&apos;s 6 / 5 / 4: {f7.goal?.DEF ?? 15} for a defender,
+              {" "}{f7.goal?.MID ?? 12.5} for a midfielder or winger, {f7.goal?.ATT ?? 10} for a striker. An assist is worth 7.5.</li>
+            <li>Everyone on the pitch gets +{f7.team_goal_for ?? 0.5} when we score and {f7.team_goal_against ?? -0.5} when they do, and
+              {" "}+{f7.clean_spell?.DEF ?? 3} for a defender (+{f7.clean_spell?.other ?? 1} for anyone else) who plays at least the fair
+              {" "}share without us conceding.</li>
+            <li>Defending near our goal means our half (the pitch is small). Shots off target count 0. Players need
+              {" "}{f7.min_minutes} minutes to be rated.</li>
+          </ul>
+        </>
+      ) : null}
       <p>
         Every rating on the site can be opened line by line, with a link to watch each moment behind it. See{" "}
         <a href="#checks">how stats are counted and checked</a>.
@@ -74,7 +96,7 @@ export default function About() {
           <div key={sec}>
             <h3>{sec}</h3>
             <ul>
-              {f.actions.filter((a) => a.section === sec).map((a) => (
+              {f.actions.filter((a) => a.section === sec && a.each !== null).map((a) => a.each === null ? null : (
                 <li key={a.key}><span>{a.label}</span><b className={a.each < 0 ? "neg" : "pos"}>{a.each > 0 ? "+" : "−"}{Math.abs(a.each)}</b></li>
               ))}
             </ul>
