@@ -40,6 +40,12 @@ export function whyRating(r: MatchPlayer, name: string, f: Formula): string[] {
   } else if (good.length) {
     out.push("No costly mistakes: nothing took points away.");
   }
+  if (f.compare === "fair7" && r.expected !== null && r.above !== null) {
+    const share = f.fair_share_min ?? 0, extra = r.minutes - share;
+    out.push(`Played ${mmss(r.minutes * 60)} against a fair share of ${mmss(share * 60)}`
+      + (extra > 0.5 ? `, so the ${mmss(extra * 60)} past it were expected to bring ${f.over_share ?? 1.5}× as much` : "")
+      + `: ${r.expected.toFixed(1)} points expected, ${(r.points ?? 0).toFixed(1)} made (${pts(r.above)}).`);
+  }
   const group = r.position ? f.roles?.[r.position] : undefined;
   const w = group ? f.role_weights?.[group] : undefined;
   if (r.position && w) {

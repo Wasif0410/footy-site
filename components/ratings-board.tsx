@@ -118,7 +118,7 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
     : r.rating === null
       ? (r.minutes < f.min_minutes ? `Only ${mmss(r.minutes * 60)} on the pitch. Players need ${f.min_minutes} minutes to be rated.`
         : `Named on camera for only ${mmss((r.judged_min ?? 0) * 60)}: too little seen to rate.`)
-      : named !== null && named < 0.5
+      : f.judge_on === "named" && named !== null && named < 0.5
         ? `The camera had ${name} named for ${mmss((r.seen_min ?? 0) * 60)} of ${mmss(r.minutes * 60)}. The rating is judged on that time only, so the rest counts neither for nor against them.`
         : null;
   const sections = f.sections.length ? f.sections : [...new Set(r.breakdown.map((b) => b.section))];
@@ -163,11 +163,15 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
                     <summary>{cells}</summary>
                     <ol>
                       {b.moments.map((m, i) => (
+                        m.t === null ? (
+                          <li key={i}><span className="when">—<small>not on video</small></span><span>{m.text}</span><span /></li>
+                        ) : (
                         <li key={i}>
                           <span className="when">{matchClock(m.t, periods)}<small>video {mmss(m.t)}</small></span>
                           <span>{m.text}</span>
                           <Link href={`/matches/${matchId}/review/?t=${m.t}`}>Watch</Link>
                         </li>
+                        )
                       ))}
                     </ol>
                   </details>
@@ -190,7 +194,15 @@ function Sheet({ r, player, formula: f, matchId, periods }: {
                 : `Points in ${mmss(r.minutes * 60)} on the pitch`}</span>
               <b>{signed(r.points)}</b>
             </li>
-            {f.compare === "fixed" ? null : (
+            {f.compare === "fair7" ? (
+              <>
+                <li><span>{`Expected for ${mmss(r.minutes * 60)} played: the team's ${f.team_per_hour.toFixed(1)} points an hour for a fair share of `
+                  + `${mmss((f.fair_share_min ?? 0) * 60)}`
+                  + (r.minutes > (f.fair_share_min ?? 0) ? `, ${f.over_share ?? 1.5}× for the ${mmss((r.minutes - (f.fair_share_min ?? 0)) * 60)} past it` : "")}</span>
+                  <b>{signed(-r.expected)}</b></li>
+                <li><span>{r.above >= 0 ? "Above what was expected" : "Short of what was expected"}</span><b>{signed(r.above)}</b></li>
+              </>
+            ) : f.compare === "fixed" ? null : (
               <>
                 <li><span>What the team&apos;s average player makes in that time ({f.team_per_hour.toFixed(1)} an hour)</span><b>{signed(r.expected)}</b></li>
                 <li><span>Above the average</span><b>{signed(r.above)}</b></li>
