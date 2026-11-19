@@ -77,7 +77,7 @@ export default function About() {
               {" "}{f7.over_share ?? 1.5}× as much, so staying on only pays off if you make a difference. Playing less isn&apos;t punished.</li>
             <li>Goals count by position, from Fantasy Premier League&apos;s 6 / 5 / 4: {f7.goal?.DEF ?? 15} for a defender,
               {" "}{f7.goal?.MID ?? 12.5} for a midfielder or winger, {f7.goal?.ATT ?? 10} for a striker. An assist is worth 7.5.</li>
-            <li>Everyone on the pitch gets +{f7.team_goal_for ?? 0.5} when we score and {f7.team_goal_against ?? -0.5} when they do, and
+            <li>Everyone on the pitch gets +{f7.team_goal_for ?? 0.5} when we score and −{Math.abs(f7.team_goal_against ?? -0.5)} when they do, and
               {" "}+{f7.clean_spell?.DEF ?? 3} for a defender (+{f7.clean_spell?.other ?? 1} for anyone else) who plays at least the fair
               {" "}share without us conceding.</li>
             <li>Defending near our goal means our half (the pitch is small). Shots off target count 0. Players need
