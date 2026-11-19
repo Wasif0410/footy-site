@@ -61,6 +61,20 @@
         "us": 4,
         "them": 1
       }
+    },
+    "nov13": {
+      "opponent": "Toronto Tigers",
+      "competition": "Rec League",
+      "venue": "The Dome",
+      "video": {
+        "youtube": "I8RdhuDEfTg",
+        "offset": 0,
+        "local": "http://localhost:8766/api/matches/nov13/video"
+      },
+      "score": {
+        "us": 3,
+        "them": 5
+      }
     }
   },
   "exclude_matches": [
@@ -68,7 +82,8 @@
     "test5",
     "oct30test",
     "nov06test",
-    "nov06s"
+    "nov06s",
+    "nov13test"
   ],
   "photos": true,
   "clips": true,
